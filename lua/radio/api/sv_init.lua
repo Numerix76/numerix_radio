@@ -4,55 +4,27 @@ Radio made by Numerix (https://steamcommunity.com/id/numerix/)
 
 --------------------------------------------------------------------------------------------------]]
 
-local gwsocketsExist = file.Exists("bin/gmsv_gwsockets_*.dll", "LUA")
-
-if gwsocketsExist then
-	require("gwsockets")
+local forceDegradeMode = false
+if !Radio.Settings.DegradeMode then
+	xpcall(require, 
+		function(err)
+			MsgC( Color( 225, 20, 30 ), "[Radio]", Color(255,255,255), " Passing into a degraded mode.\n")
+			Radio.Settings.DegradeMode = true
+			forceDegradeMode = true
+		end,
+		"gwsockets"
+	)
 end
 
 hook.Add("PlayerInitialSpawn", "Radio:PlayerInitialSpawnCheckGWSocket", function(ply)
-	if ply:IsSuperAdmin() and !gwsocketsExist then
+	if ply:IsSuperAdmin() and forceDegradeMode then
 		timer.Simple(10, function()
 			ply:RadioChatInfo(Radio.GetLanguage("The module GWSocket is not present on the server"), 3)
 		end)
 	end
 end)
 
-local ensFunctions
-function Radio.SetMusic(ply, ent, url)
-	if ent.isloading then return end
-
-	ent.isloading = true
-
-	ent:SetNWString( "Radio:URL", "")
-    ent:SetNWString( "Radio:Mode", "0")
-    ent:SetNWString( "Radio:Info", Radio.GetLanguage("Connection to the backend"))
-
-	ent.socket = GWSockets.createWebSocket( "ws://92.222.234.121:3000/get/mp3" )
-
-	function ent.socket:onMessage(txt)
-		local data = util.JSONToTable(txt)
-
-		ensFunctions[data.type](ply, ent, data)
-	end
-	
-	function ent.socket:onError(txt)
-		error(ply, ent, {message = txt})
-		ent.isloading = false
-	end
-	
-	function ent.socket:onConnected()
-		ent.socket:write(url)
-	end
-	
-	function ent.socket:onDisconnected()
-		ent:SetNWString( "Radio:Info", "")
-		ent.isloading = false
-	end
-
-	ent.socket:open()
-end
-
+local ensFunctions, ensFunctionsDegrade
 local function infos_music(ply, ent, data)
 	if data.duration > Radio.Settings.MaxDuration then
 		if ent.socket then
@@ -111,7 +83,7 @@ local function finished(ply, ent, data)
 	end
 end
 
-local function error(ply, ent, data)
+local function errorRadio(ply, ent, data)
 	if ent.socket then
 		ent.socket:close()
 	end
@@ -121,6 +93,74 @@ local function error(ply, ent, data)
 
 	if ( data.log ) then
 		Radio.Error(ply, Radio.GetLanguage("Logs") .. " : " .. data.log)
+	end
+end
+
+local function connectWebsite(ply, ent, url)
+	ent:SetNWString( "Radio:Info", Radio.GetLanguage("Conversion on the backend (this can take some time)"))
+	
+	http.Fetch("http://92.222.234.121:3000/get/mp3/degrade", 
+		function(body)
+			for _, data in pairs(util.JSONToTable(body)) do
+				if ensFunctionsDegrade[data.type] then
+					ensFunctionsDegrade[data.type](ply, ent, data)
+				end
+			end
+
+			ent:SetNWString( "Radio:Info", "")
+			ent.isloading = false
+		end,
+		function(errorMessage)
+			errorRadio(ply, ent, {message = string.format(Radio.GetLanguage("Can't connect to the backend or the conversion take too long. (%s)"), errorMessage) })
+			ent.isloading = false
+		end,
+
+		{url = url}
+	)
+end
+
+local function connectWebsocket(ply, ent, url)
+	ent:SetNWString( "Radio:Info", Radio.GetLanguage("Connection to the backend"))
+
+	ent.socket = GWSockets.createWebSocket( "ws://92.222.234.121:3000/get/mp3" )
+
+	function ent.socket:onMessage(txt)
+		local data = util.JSONToTable(txt)
+
+		if ensFunctions[data.type] then
+			ensFunctions[data.type](ply, ent, data)
+		end
+	end
+	
+	function ent.socket:onError(txt)
+		errorRadio(ply, ent, {message = txt})
+		ent.isloading = false
+	end
+	
+	function ent.socket:onConnected()
+		ent.socket:write(url)
+	end
+	
+	function ent.socket:onDisconnected()
+		ent:SetNWString( "Radio:Info", "")
+		ent.isloading = false
+	end
+
+	ent.socket:open()
+end
+
+function Radio.SetMusic(ply, ent, url)
+	if ent.isloading then return end
+
+	ent.isloading = true
+
+	ent:SetNWString( "Radio:URL", "")
+    ent:SetNWString( "Radio:Mode", "0")
+
+	if ( Radio.Settings.DegradeMode ) then
+		connectWebsite(ply, ent, url)
+	else
+		connectWebsocket(ply, ent, url)
 	end
 end
 
@@ -134,5 +174,11 @@ ensFunctions = {
 	["conversion_progress"] = conversion_progress,
 	["conversion_finished"] = conversion_finished,
 	["finished"] = finished,
-	["error"] = error,
+	["error"] = errorRadio,
+}
+
+ensFunctionsDegrade = {
+	["infos_music"] = infos_music,
+	["finished"] = finished,
+	["error"] = errorRadio,
 }

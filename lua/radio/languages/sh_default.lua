@@ -4,7 +4,7 @@ Radio made by Numerix (https://steamcommunity.com/id/numerix/)
 
 --------------------------------------------------------------------------------------------------]]
 
-Radio.Language.VersionDefault = "2.0.1" --DON'T TOUCH THIS
+Radio.Language.VersionDefault = "2.0.2" --DON'T TOUCH THIS
 
 Radio.Language["default"] = {
 	["The file does not exist."] = "The file does not exist.",
@@ -65,6 +65,8 @@ Radio.Language["default"] = {
 	["Conversion progress"] = "Conversion progress on the backend : %.2f%%",
 	["Finished conversion"] = "Finished the conversion on the backend",
 	["Logs"] = "Logs",
+	["Can't connect to the backend or the conversion take too long. (%s)"] = "Can't connect to the backend or the conversion take too long. (%s)",
+	["Conversion on the backend (this can take some time)"] = "Conversion on the backend (this can take some time)",
 
 	["A new version of the config file is available. Please download it."] = "A new version of the config file is available. Please download it.",
 	["A new version of the language file is available. Please download it."] = "A new version of the language file is available. Please download it.",

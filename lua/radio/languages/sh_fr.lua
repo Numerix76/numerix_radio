@@ -63,6 +63,8 @@ Radio.Language["fr"] = {
 	["Conversion progress"] = "Progression de la conversion sur le backend : %.2f%%",
 	["Finished conversion"] = "Fin de la conversion sur le backend",
 	["Logs"] = "Logs",
+	["Can't connect to the backend or the conversion take too long. (%s)"] = "Impossible de se connecter au backend ou la conversion à été trop longue (%s)",
+	["Conversion on the backend (this can take some time)"] = "Conversion sur le backend (cela peut prendre un peu de temps)",
 
 	["A new version of the config file is available. Please download it."] = "Une nouvelle version du fichier de configuration est disponible. Veuillez le télécharger.",
 	["A new version of the language file is available. Please download it."] = "Une nouvelle version du fichier de langue est disponible. Veuillez le télécharger.",

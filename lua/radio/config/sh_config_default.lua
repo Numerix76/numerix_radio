@@ -4,13 +4,15 @@ Radio made by Numerix (https://steamcommunity.com/id/numerix/)
 
 --------------------------------------------------------------------------------------------------]]
 
-Radio.Settings.VersionDefault = "2.0.2" --DON'T TOUCH THIS
+Radio.Settings.VersionDefault = "2.0.3" --DON'T TOUCH THIS
 
 --If debug true then if there is a problem you will have the line related in the console
 Radio.Settings.Debug = false
 
 --Change the language
 Radio.Settings.Language = "en"
+
+Radio.Settings.DegradeMode = true
 
 --Change the distance max of the radio
 Radio.Settings.DistanceSoundRadio = 400
