@@ -10,6 +10,7 @@ AddCSLuaFile( "shared.lua" )
 include("shared.lua")
 
 function ENT:Initialize()
+	self.health = self.health or 100
 	self:SetModel(self.Model or "models/sligwolf/grocel/radio/ghettoblaster.mdl")
 	self:PhysicsInit( SOLID_VPHYSICS )      
 	self:SetMoveType( MOVETYPE_VPHYSICS )  
@@ -24,6 +25,24 @@ function ENT:Initialize()
 	if isnumber(self.SID) and FPP then
 		self:CPPISetOwner(Player(self.SID))
 	end
+end
+
+function ENT:OnTakeDamage( dmgInfo )	
+	self.Entity:TakePhysicsDamage(dmgInfo)
+
+	self.health = self.health - dmgInfo:GetDamage()
+
+	if self.health <= 0 then self:explode() end
+end
+	
+function ENT:explode()
+	if !Radio.Settings.ExplodeDamage then return end
+
+	local effectdata = EffectData()
+	effectdata:SetOrigin(self.Entity:GetPos())
+	util.Effect("ThumperDust", effectdata, true, true)
+	util.Effect("Explosion", effectdata, true, true)
+	self:Remove()
 end
 
 function ENT:AcceptInput( Name, Activator, Caller )	
