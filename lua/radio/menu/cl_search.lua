@@ -149,8 +149,12 @@ function Radio.ReloadMenu(menu, type, ent, error)
 	end
 end
 
-function Radio.GetSearch(type, search, menu, ent)
-	search = string.Replace(search, " ", "%20")
+function toURI(c)	
+	return string.format ("%%%02X", string.byte(c))
+end
+ 
+ function Radio.GetSearch(type, search, menu, ent)
+	search = string.Replace( string.gsub(search, "([^%w ])", toURI), " ", "%20")
 
 	http.Fetch("http://92.222.234.121:3000/search/".. (type == 1 and "youtube" or "soundcloud").. "/" ..search, 
 		function( body, len, headers, code )
