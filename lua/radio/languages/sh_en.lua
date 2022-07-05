@@ -54,6 +54,7 @@ Radio.Language["en"] = {
 	["Allow buddy (FPP) to use radio ?"] = "Allow buddy (FPP) to use radio ?",
 	["Check your console to have a debug trace"] = "Check your console to have a debug trace",
 	["Radio Internet"] = "Radio Internet",
+	["You are not an admin, you can't use that radio."] = "You are not an admin, you can't use that radio.",
 
 	["Connection to the backend"] = "Connecting to the backend",
 	["Starting download"] = "Starting the download on the backend",

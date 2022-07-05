@@ -13,6 +13,10 @@ function ENT:InitRadio()
 		self.DistanceSound = Radio.Settings.DistanceSoundRadio^2
 	end
 
+	if self.IsAdmin then
+		self.DistanceSound = -1
+	end
+
 	if SERVER then
 		self:SetNWString( "Radio:URL", "" )
 		self:SetNWString( "Radio:Author", "" )

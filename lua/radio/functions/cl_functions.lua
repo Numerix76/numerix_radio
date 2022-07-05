@@ -46,6 +46,8 @@ function ENT:ThinkRadio()
 			if ( IsValid( station ) and IsValid( self ) ) then
 				station:SetPos( self:GetPos() )
 				station:Play()
+
+				station:Set3DEnabled( !self.IsAdmin )
 				station:Set3DFadeDistance( -1, 1 )
 				
 				self.Playing = true
@@ -71,8 +73,11 @@ function ENT:ThinkRadio()
 		volume = 0
 	else	
 		volume = self:GetNWInt( "Radio:Volume")/100
-		volume = volume * ( 1 - ( self.station:GetPos():DistToSqr( ply:EyePos() ) ) / self:GetNWInt("Radio:DistanceSound") )
-		volume = math.Clamp(volume, 0, 1)
+
+		if !self.IsAdmin then
+			volume = volume * ( 1 - ( self.station:GetPos():DistToSqr( ply:EyePos() ) ) / self:GetNWInt("Radio:DistanceSound") )
+			volume = math.Clamp(volume, 0, 1)
+		end
 
 		if self:IsCarRadio() then
 			volume = volume * 3

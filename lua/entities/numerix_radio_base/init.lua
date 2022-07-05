@@ -47,6 +47,13 @@ end
 
 function ENT:AcceptInput( Name, Activator, Caller )	
 	if Name == "Use" and Caller:IsPlayer() and self:CanModificateRadio(Activator) then
+
+		if self.IsAdmin and Caller:IsAdmin() then
+			Caller:RadioChatInfo( Radio.GetLanguage("You are not an admin, you can't use that radio.") )
+
+			return
+		end
+
 		net.Start( "Radio:OpenStreamMenu" )
 		net.WriteEntity( self )
 		net.Send( Activator )
