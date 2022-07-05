@@ -259,15 +259,15 @@ function PANEL:MakeContent(ent, type)
 		end
 	end
 	function TimeSlider.Slider:OnMouseReleased( mcode )
+		if ent.Playing and radio:GetNWString("Radio:Mode") != "3" and Radio.Settings.Seek and ent == radio then
+			self:SetDragging( false );
+			self:MouseCapture( false );
 
-		self:SetDragging( false );
-		self:MouseCapture( false );
-
-		net.Start("Radio:SeekMusic")
-        net.WriteEntity(ent)
-        net.WriteString(self:GetSlideX() * ent:GetNWInt("Radio:Duration"))
-        net.SendToServer() 
-			
+			net.Start("Radio:SeekMusic")
+			net.WriteEntity(ent)
+			net.WriteString(self:GetSlideX() * ent:GetNWInt("Radio:Duration"))
+			net.SendToServer()
+		end			
 	end
 	function TimeSlider.Slider.Knob:OnMouseReleased( mcode )
 		if ent.Playing and radio:GetNWString("Radio:Mode") != "3" and Radio.Settings.Seek and ent == radio then
