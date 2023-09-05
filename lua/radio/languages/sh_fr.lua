@@ -71,4 +71,10 @@ Radio.Language["fr"] = {
 	["A new version of the language file is available. Please download it."] = "Une nouvelle version du fichier de langue est disponible. Veuillez le télécharger.",
 	["A new version of the addon is available. Please download it."] = "Une nouvelle version de l'addon est disponible. Veuillez le télécharger.",
 	["The module GWSocket is not present on the server"] = "Le module GWSocket n'est pas présent sur le serveur. Veuillez aller sur https://steamcommunity.com/sharedfiles/filedetails/?id=1989484474 pour l'installer",
+
+	["An error occured while uploading the file. (%s)"] = "Une erreur est survenu lors de l'envoie du fichier. (%s)",
+	["Downloading the video on the server."] = "Téléchargement de la vidéo en cours.",
+	["The server IP seems to be banned from the google video services. Please contact the server owner."] = "L'adresse IP du serveur semble avoir été banni de google video. Veuillez contactez le propriétaire du serveur.",
+	["An error occured while downloading the file. (%s)"] = "Une erreur est survenu lors du téléchargement de la vidéo. (%s)",
+	["Starting the upload of the video to the backend."] = "Envoie de la vidéo sur le backend."
 }

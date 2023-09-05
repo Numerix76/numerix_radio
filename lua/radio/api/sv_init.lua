@@ -3,17 +3,19 @@
 Radio made by Numerix (https://steamcommunity.com/id/numerix/)
 
 --------------------------------------------------------------------------------------------------]]
+local baseUri = "http://92.222.234.121:3001"
+local baseUriWS = "ws://92.222.234.121:3001"
+local ensFunctions, ensFunctionsDegrade
 
 local forceDegradeMode = false
 if !Radio.Settings.DegradeMode then
-	xpcall(require, 
-		function(err)
-			MsgC( Color( 225, 20, 30 ), "[Radio]", Color(255,255,255), " Passing into a degraded mode.\n")
-			Radio.Settings.DegradeMode = true
-			forceDegradeMode = true
-		end,
-		"gwsockets"
-	)
+	if util.IsBinaryModuleInstalled("gwsockets") then
+		require("gwsockets")
+	else
+		MsgC( Color( 225, 20, 30 ), "[Radio]", Color(255,255,255), " Passing into a degraded mode.\n")
+		Radio.Settings.DegradeMode = true
+		forceDegradeMode = true
+	end
 end
 
 hook.Add("PlayerInitialSpawn", "Radio:PlayerInitialSpawnCheckGWSocket", function(ply)
@@ -24,7 +26,98 @@ hook.Add("PlayerInitialSpawn", "Radio:PlayerInitialSpawnCheckGWSocket", function
 	end
 end)
 
-local ensFunctions, ensFunctionsDegrade
+local function errorRadio(ply, ent, data)
+	if ent.socket then
+		ent.socket:close()
+	end
+
+	ent:SetNWString( "Radio:Info", Radio.GetLanguage("An error occured. Check the message in chat") )
+	Radio.Error(ply, data.message)
+
+	ent.isloading = false
+
+	if ( data.log ) then
+		Radio.Error(ply, Radio.GetLanguage("Logs") .. " : " .. data.log)
+	end
+end
+
+local function connectWebsite(ply, ent, url)
+	ent:SetNWString( "Radio:Info", Radio.GetLanguage("Conversion on the backend (this can take some time)"))
+	
+	http.Fetch(baseUri .. "/get/mp3/degrade", 
+		function(body)
+			for _, data in pairs(util.JSONToTable(body)) do
+				if ensFunctionsDegrade[data.type] then
+					ensFunctionsDegrade[data.type](ply, ent, data)
+				end
+			end
+		end,
+		function(errorMessage)
+			errorRadio(ply, ent, {message = string.format(Radio.GetLanguage("Can't connect to the backend or the conversion take too long. (%s)"), errorMessage) })
+		end,
+
+		{url = url}
+	)
+end
+
+local function upload(ply, ent, youtubeURL, fileData, callback)
+	ent:SetNWString( "Radio:Info", Radio.GetLanguage("Starting the upload of the video to the backend."))
+
+	HTTP({
+		method = "POST",
+		url = baseUri .. "/upload?url=" .. youtubeURL,
+		body = fileData,
+		success = function(code, body)
+			if ( code != 200 ) then
+				errorRadio(ply, ent, {message = string.format(Radio.GetLanguage("An error occured while uploading the file. (%s)"), code) })
+				return 
+			end
+	
+			if ( callback ) then
+				callback(ply, ent, youtubeURL)
+			end
+		end,
+		failed = function(message) 
+			errorRadio(ply, ent, {message = string.format(Radio.GetLanguage("An error occured while uploading the file. (%s)"), message) })
+		end
+	})
+end
+
+local function download(ply, ent, googleURL, youtubeURL)
+	ent:SetNWString( "Radio:Info", Radio.GetLanguage("Downloading the video on the server.") )
+	
+	http.Fetch(googleURL,
+		-- onSuccess function
+		function( body, length, headers, code )
+			if ( code == 403 ) then
+				errorRadio(ply, ent, {message = Radio.GetLanguage("The server IP seems to be banned from the google video services. Please contact the server owner.") })
+				return
+			end
+
+			if ( code != 200 ) then
+				errorRadio(ply, ent, {message = string.format(Radio.GetLanguage("An error occured while downloading the file. (%s)"), code) })
+				return 
+			end
+
+			local fileData = body
+
+			if ( Radio.Settings.DegradeMode ) then
+				upload(ply, ent, youtubeURL, fileData, connectWebsite)
+			else
+				upload(ply, ent, youtubeURL, fileData, function(ply, ent, youtubeURL)
+					ent.socket:write("upload_finished")
+				end)
+			end
+		end,
+
+		-- onFailure function
+		function( message )
+			errorRadio(ply, ent, {message = string.format(Radio.GetLanguage("An error occured while downloading the file. (%s)"), message) })
+		end
+	)
+end
+
+
 local function infos_music(ply, ent, data)
 	if data.duration > Radio.Settings.MaxDuration then
 		if ent.socket then
@@ -44,16 +137,8 @@ local function infos_music(ply, ent, data)
 	ent.duration = data.duration -- we need to sent the duration after the Radio:URL
 end
 
-local function download_started(ply, ent, data)
-	ent:SetNWString( "Radio:Info", Radio.GetLanguage("Starting download") )
-end
-
-local function download_progress(ply, ent, data)
-	ent:SetNWString( "Radio:Info", string.format(Radio.GetLanguage("Download progress"), data.percent) )
-end
-
-local function download_finished(ply, ent, data)
-	ent:SetNWString( "Radio:Info", Radio.GetLanguage("Finished download") )
+local function download_url(ply, ent, data)
+	download(ply, ent, data.googleURL, data.youtubeURL)
 end
 
 local function conversion_started(ply, ent, data)
@@ -78,51 +163,20 @@ local function finished(ply, ent, data)
 	ent:SetNWString( "Radio:Mode", "1")
 	ent:SetNWInt   ( "Radio:Time", CurTime())
 
+	ent:SetNWString( "Radio:Info", "")
+	ent.isloading = false
+
 	if ent.live then
 		ent:SetNWString( "Radio:Mode", "3")
 	end
 end
 
-local function errorRadio(ply, ent, data)
-	if ent.socket then
-		ent.socket:close()
-	end
 
-	ent:SetNWString( "Radio:Info", Radio.GetLanguage("An error occured. Check the message in chat") )
-	Radio.Error(ply, data.message)
-
-	if ( data.log ) then
-		Radio.Error(ply, Radio.GetLanguage("Logs") .. " : " .. data.log)
-	end
-end
-
-local function connectWebsite(ply, ent, url)
-	ent:SetNWString( "Radio:Info", Radio.GetLanguage("Conversion on the backend (this can take some time)"))
-	
-	http.Fetch("http://92.222.234.121:3000/get/mp3/degrade", 
-		function(body)
-			for _, data in pairs(util.JSONToTable(body)) do
-				if ensFunctionsDegrade[data.type] then
-					ensFunctionsDegrade[data.type](ply, ent, data)
-				end
-			end
-
-			ent:SetNWString( "Radio:Info", "")
-			ent.isloading = false
-		end,
-		function(errorMessage)
-			errorRadio(ply, ent, {message = string.format(Radio.GetLanguage("Can't connect to the backend or the conversion take too long. (%s)"), errorMessage) })
-			ent.isloading = false
-		end,
-
-		{url = url}
-	)
-end
 
 local function connectWebsocket(ply, ent, url)
 	ent:SetNWString( "Radio:Info", Radio.GetLanguage("Connection to the backend"))
 
-	ent.socket = GWSockets.createWebSocket( "ws://92.222.234.121:3000/get/mp3" )
+	ent.socket = GWSockets.createWebSocket( baseUriWS .."/get/mp3" )
 
 	function ent.socket:onMessage(txt)
 		local data = util.JSONToTable(txt)
@@ -134,7 +188,6 @@ local function connectWebsocket(ply, ent, url)
 	
 	function ent.socket:onError(txt)
 		errorRadio(ply, ent, {message = txt})
-		ent.isloading = false
 	end
 	
 	function ent.socket:onConnected()
@@ -167,9 +220,7 @@ end
 --Need to set it after all functions have been created
 ensFunctions = {
 	["infos_music"] = infos_music,
-	["download_started"] = download_started,
-	["download_progress"] = download_progress,
-	["download_finished"] = download_finished,
+	["download_url"] = download_url,
 	["conversion_started"] = conversion_started,
 	["conversion_progress"] = conversion_progress,
 	["conversion_finished"] = conversion_finished,
@@ -179,6 +230,7 @@ ensFunctions = {
 
 ensFunctionsDegrade = {
 	["infos_music"] = infos_music,
+	["download_url"] = download_url,
 	["finished"] = finished,
 	["error"] = errorRadio,
 }
