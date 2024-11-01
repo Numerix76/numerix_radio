@@ -59,6 +59,9 @@ Radio.Language["default"] = {
 	["You are not an admin, you can't use that radio."] = "You are not an admin, you can't use that radio.",
 
 	["Connection to the backend"] = "Connecting to the backend",
+	["Starting download"] = "Starting the download on the backend",
+	["Download progress"] = "Download progress on the backend : %.2f%%",
+	["Finished download"] = "Finished the download on the backend",
 	["Starting conversion"] = "Starting the conversion on the backend",
 	["Conversion progress"] = "Conversion progress on the backend : %.2f%%",
 	["Finished conversion"] = "Finished the conversion on the backend",

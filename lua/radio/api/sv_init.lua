@@ -141,12 +141,28 @@ local function download_url(ply, ent, data)
 	download(ply, ent, data.googleURL, data.youtubeURL)
 end
 
+local function download_started(ply, ent, data)
+	ent:SetNWString( "Radio:Info", Radio.GetLanguage("Starting download") )
+end
+
+local function download_progress(ply, ent, data)
+	if ( data.percent ) then
+		ent:SetNWString( "Radio:Info", string.format(Radio.GetLanguage("Download progress"), data.percent) )
+	end
+end
+
+local function download_finished(ply, ent, data)
+	ent:SetNWString( "Radio:Info", Radio.GetLanguage("Finished download") )
+end
+
 local function conversion_started(ply, ent, data)
 	ent:SetNWString( "Radio:Info", Radio.GetLanguage("Starting conversion") )
 end
 
 local function conversion_progress(ply, ent, data)
-	ent:SetNWString( "Radio:Info", string.format(Radio.GetLanguage("Conversion progress"), data.percent) )
+	if ( data.percent ) then
+		ent:SetNWString( "Radio:Info", string.format(Radio.GetLanguage("Conversion progress"), data.percent) )
+	end
 end
 
 local function conversion_finished(ply, ent, data)
@@ -221,6 +237,9 @@ end
 ensFunctions = {
 	["infos_music"] = infos_music,
 	["download_url"] = download_url,
+	["download_started"] = download_started,
+	["download_progress"] = download_progress,
+	["download_finished"] = download_finished,
 	["conversion_started"] = conversion_started,
 	["conversion_progress"] = conversion_progress,
 	["conversion_finished"] = conversion_finished,

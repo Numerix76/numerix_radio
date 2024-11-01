@@ -14,7 +14,7 @@ Radio.Settings.Language = "en"
 
 --If set to true, the addon will use the HTTP library from the game for running music. You will not being able to see the status of the conversion.
 --If set to false, the addon will need GWSocket (see : https://steamcommunity.com/sharedfiles/filedetails/?id=1989484474). You wiil be able to see the status of the conversion.
-Radio.Settings.DegradeMode = true
+Radio.Settings.DegradeMode = false
 
 --Change the distance max of the radio
 Radio.Settings.DistanceSoundRadio = 400
