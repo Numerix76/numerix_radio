@@ -16,7 +16,7 @@ Radio.AllServer = Radio.AllServer or {}
 
 local FileSystem = "radio"
 local AddonName = "Radio"
-local Version = "2.2.2"
+local Version = "2.2.3"
 local FromWorkshop = false
 
 MsgC( Color( 225, 20, 30 ), "\n-------------------------------------------------------------------\n")
@@ -25,7 +25,7 @@ MsgC( Color( 225, 20, 30 ), "---------------------------------------------------
 
 if SERVER then
 
-	for k, file in pairs (file.Find(FileSystem.."/config/*", "LUA")) do
+	for k, file in SortedPairs(file.Find(FileSystem.."/config/*", "LUA")) do
 		include(FileSystem.."/config/"..file)
 		AddCSLuaFile(FileSystem.."/config/"..file)
 		MsgC( Color( 225, 20, 30 ), "["..AddonName.."]", Color(255,255,255), " Loading : "..FileSystem.."/config/"..file.."\n")
