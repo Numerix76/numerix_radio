@@ -257,17 +257,15 @@ function PANEL:MakeContent(ent, type)
 		end
 	end
 	function TimeSlider.Slider:OnMouseReleased( mcode )
-		if radio:IsPlaying() and !radio:IsLive() and Radio.Settings.Seek and !radio:IsConnectedToServer() then
-			
+		self:SetDragging( false );
+		self:MouseCapture( false );
 
+		if radio:IsPlaying() and !radio:IsLive() and Radio.Settings.Seek and !radio:IsConnectedToServer() then
 			net.Start("Radio:SeekMusic")
 			net.WriteEntity(ent)
 			net.WriteFloat(self:GetSlideX() * radio:GetMusicDuration())
 			net.SendToServer()
 		end
-
-		self:SetDragging( false );
-		self:MouseCapture( false );
 	end
 	function TimeSlider.Slider.Knob:OnMouseReleased( mcode )
 		if radio:IsPlaying() and !radio:IsLive() and Radio.Settings.Seek and !radio:IsConnectedToServer() then
@@ -340,11 +338,11 @@ function PANEL:MakeContent(ent, type)
 		end
 	end
 	function VolumeSlider.Slider:OnMouseReleased( mcode )
-
 		self:SetDragging( false );
 		self:MouseCapture( false );
 
-		if radio:GetVolume() == self:GetSlideX() then return end
+		if radio:GetVolume() == self:GetSlideX() * 100 then return end
+
         net.Start("Radio:UpdateVolume")
         net.WriteEntity(ent)
         net.WriteUInt(self:GetSlideX() * 100, 7)
@@ -352,15 +350,14 @@ function PANEL:MakeContent(ent, type)
 		
 	end
 	function VolumeSlider.Slider.Knob:OnMouseReleased( mcode )
+		if radio:GetVolume() == self:GetParent():GetSlideX() * 100 then return end
 
-		if radio:GetVolume() == self:GetParent():GetSlideX() then return end
         net.Start("Radio:UpdateVolume")
         net.WriteEntity(ent)
-        net.WriteUInt(self:GetParent():GetSlideX(), 7)
+        net.WriteUInt(self:GetParent():GetSlideX() * 100, 7)
         net.SendToServer()
 
 		return DLabel.OnMouseReleased( self, mcode )
-
 	end
 end
 vgui.Register("Radio_Foot", PANEL, "DPanel")
