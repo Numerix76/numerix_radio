@@ -55,6 +55,9 @@ Radio.Settings.VehicleSpawnRadio = false
 --Can radio in vehicle can be retrieve from it when they have spawned with it ?
 Radio.Settings.VehicleSpawnRadioRetrieve = true
 
+-- The music of a vehicle is only listenable if the player is inside the vehicle ?
+Radio.Settings.VehicleSoundOnly = true
+
 --Allow the radio to explode if took too much damage ?
 Radio.Settings.ExplodeDamage = true
 

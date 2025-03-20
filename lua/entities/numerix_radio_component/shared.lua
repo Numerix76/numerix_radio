@@ -23,13 +23,25 @@ function ENT:IsConnectedToServer()
 end
 
 function ENT:GetMaxDistanceSound()
-	if ( Radio.IsCar(self:GetParent()) ) then return -1 end -- In car, we don't have distance
-
 	return self:GetNWInt("Radio:MaxDistanceSound", 800^2)
 end
 
 function ENT:GetDistanceSound()
-	return (Radio.IsCar(self:GetParent()) or self:GetMaxDistanceSound() <= 0) and -1 or self:GetMaxDistanceSound()*self:GetVolume()/100
+	if ( Radio.IsCar(self:GetParent()) and Radio.Settings.VehicleSoundOnly ) then
+		return -1
+	end
+
+	if ( self:GetMaxDistanceSound() <= 0 ) then
+		return -1
+	end
+
+	local distance = self:GetMaxDistanceSound()*self:GetVolume()/100
+
+	if ( Radio.IsCar(self:GetParent())) then
+		distance = distance / 3
+	end
+
+	return distance
 end
 
 function ENT:GetURL()
@@ -127,7 +139,7 @@ function ENT:IsLooping()
 end
 
 function ENT:CanHear(ply)
-	if ( Radio.IsCar(self:GetParent()) ) then
+	if ( Radio.IsCar(self:GetParent()) and Radio.Settings.VehicleSoundOnly ) then
 		if ( !ply:InVehicle() ) then return false end
 		if ( ply:GetVehicle():GetParent() != self:GetParent() and ply:GetVehicle() != self:GetParent() ) then return false end
 	end
