@@ -130,6 +130,8 @@ function SWEP:SecondaryAttack()
 			end
 
 			trace.Entity:SetRadioComponent(radio)
+
+			self.Owner:StripWeapon( self:GetClass() )
 		elseif ( Radio.Settings.EnableEntity and !Radio.IsCar(trace.Entity) ) then
 			local ent = ents.Create( "numerix_radio" )
 			ent:SetPos( trace.HitPos )
@@ -140,9 +142,9 @@ function SWEP:SecondaryAttack()
 
 			ent:SetColor(radio:GetColor())
 			ent:SetRadioComponent(radio)
-		end
 
-		self.Owner:StripWeapon( self:GetClass() )
+			self.Owner:StripWeapon( self:GetClass() )
+		end
 	end
 end
 
@@ -236,9 +238,7 @@ SWEP.VElements = {
 
 if CLIENT then
 	SWEP.vRenderOrder = nil
-	function SWEP:ViewModelDrawn()
-		if true then return end
-		
+	function SWEP:ViewModelDrawn()		
 		local vm = self.Owner:GetViewModel()
 		if !IsValid(vm) then return end
 		
@@ -337,7 +337,6 @@ if CLIENT then
 	end
 	SWEP.wRenderOrder = nil
 	function SWEP:DrawWorldModel()
-		if true then return end
 		if (self.ShowWorldModel == nil or self.ShowWorldModel) then
 			self:DrawModel()
 		end
@@ -412,7 +411,7 @@ if CLIENT then
 					render.SuppressEngineLighting(true)
 				end
 				
-				local color = string.ToColor(self:GetRadioComponent():GetColor())
+				local color = self:GetRadioComponent():GetColor()
 				render.SetColorModulation(color.r/255,color.g/255, color.b/255 )
 				model:DrawModel()
 				render.SetBlend(1)
