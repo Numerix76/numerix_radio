@@ -46,3 +46,24 @@ hook.Add( "playerGetSalary", "Radio:AnimSalary", function(ply, amount)
         end
     end
 end)
+
+
+hook.Add("PlayerLeaveVehicle", "Radio:LeaveCar", function(ply, veh)
+	if ( !ply:HasWeapon("numerix_radio_swep") ) then return end
+
+	local weapon = ply:GetWeapon("numerix_radio_swep")
+	local isActive = ply:GetActiveWeapon() == weapon
+
+	local radio = weapon:GetRadioComponent()
+	radio:SetParent(nil) -- We detach to avoid delete when removing the old weapon
+	ply:StripWeapon("numerix_radio_swep")
+
+	weapon = ply:Give("numerix_radio_swep")
+	weapon:SetRadioComponent(radio)
+
+	if ( isActive ) then
+		timer.Simple(0.01, function()
+			ply:SelectWeapon(weapon)
+		end)
+	end
+end)
