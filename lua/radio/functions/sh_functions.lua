@@ -6,109 +6,104 @@ Radio made by Numerix (https://steamcommunity.com/id/numerix/)
 
 local ENT = FindMetaTable("Entity")
 
-function ENT:InitRadio()	
-	if self.IsServer then
-		self.DistanceSound = Radio.Settings.DistanceSoundServer^2
-	else
-		self.DistanceSound = Radio.Settings.DistanceSoundRadio^2
-	end
+function ENT:GetRadioComponent()
+	local children = self:GetChildren()
 
-	if self.IsAdmin then
-		self.DistanceSound = -1
-	end
-
-	if SERVER then
-		self:SetNWString( "Radio:URL", "" )
-		self:SetNWString( "Radio:Author", "" )
-		self:SetNWString( "Radio:Title", "" )
-		self:SetNWString( "Radio:Mode", "0" )
-		self:SetNWString( "Radio:Info", "" )
-		self:SetNWString( "Radio:Visual", "255 255 255" )
-		self:SetNWString( "Radio:Color", "255 255 255" )
-		self:SetNWString( "Radio:Thumbnail", "")
-		self:SetNWString( "Radio:ThumbnailName", "")
-
-		self:SetNWInt( "Radio:Volume", 50 )
-		self:SetNWInt( "Radio:Time", CurTime() )
-		self:SetNWInt( "Radio:Duration", 0)
-		self:SetNWInt( "Radio:DistanceSound", self.DistanceSound)
-		
-
-		self:SetNWBool( "Radio:Pause", false)
-		self:SetNWBool( "Radio:Rainbow", false)
-		self:SetNWBool( "Radio:Private", false)
-		self:SetNWBool( "Radio:PrivateBuddy", false)
-
-		self:SetNWInt("Radio:Controler", self:EntIndex())
-		self.LastStation = self
-	end
-
-	if self.IsServer then
-		if SERVER then
-			self:SetNWString( "Radio:StationName", "Default Name")
-			self:SetNWInt( "Radio:Viewer", 0)
-			self:GetNWBool( "Radio:Voice", false)
+	for k, v in ipairs(children) do
+		if ( v:GetClass() == "numerix_radio_component" ) then
+			return v
 		end
+	end
 
-        Radio.AllServer[self] = true
-    end
-
-	Radio.AllRadio[self] = true
-	if !self.SWEPRadio and !self.IsServer then self.ENTRadio = true end
+	return nil
 end
 
-function ENT:IsCarRadio()
-    if !IsValid(self) then return false end
-	if IsValid(self:GetParent()) then return false end --The ent is a part of a vehicle
+local PLAYER = FindMetaTable("Player")
+
+Radio.Chat.INFO = 1
+Radio.Chat.SUCCESS = 2
+Radio.Chat.ERROR = 3
+
+function PLAYER:RadioChatInfo(msg, type)
+	if SERVER then
+		if type == Radio.Chat.INFO then
+			self:SendLua("chat.AddText(Color( 225, 20, 30 ), [[[Radio] : ]] , Color( 0, 165, 225 ), [["..msg.."]])")
+		elseif type == Radio.Chat.SUCCESS then
+			self:SendLua("chat.AddText(Color( 225, 20, 30 ), [[[Radio] : ]] , Color( 180, 225, 197 ), [["..msg.."]])")
+		else
+			self:SendLua("chat.AddText(Color( 225, 20, 30 ), [[[Radio] : ]] , Color( 225, 20, 30 ), [["..msg.."]])")
+		end
+	end
+
+	if CLIENT then
+		if type == 1 then
+			chat.AddText(Color( 225, 20, 30 ), [[[Radio] : ]] , Color( 0, 165, 225 ), msg)
+		elseif type == 2 then
+			chat.AddText(Color( 225, 20, 30 ), [[[Radio] : ]] , Color( 180, 225, 197 ), msg)
+		else
+			chat.AddText(Color( 225, 20, 30 ), [[[Radio] : ]] , Color( 225, 20, 30 ), msg)
+		end
+	end
+end
+
+
+local cachedIsCarResult = {}
+function Radio.IsCar(ent)
+	if !IsValid(ent) then return false end
+
+	local result = function()
+		if ( cachedIsCarResult[ent] != nil ) then return cachedIsCarResult[ent] end
+
+		if IsValid(ent:GetParent()) then return false end --The ent is a part of a vehicle
 	
-    if self:IsVehicle() then return true end
-    if simfphys and simfphys.IsCar and simfphys.IsCar(ent) then return true end
-    if self:GetClass() == "prop_vehicle_jeep" then return true end
-	if scripted_ents.IsBasedOn(self:GetClass(), "wac_hc_base") then return true end
+		if ent:IsVehicle() then return true end
+		if simfphys and simfphys.IsCar and simfphys.IsCar(ent) then return true end
+		if ent:GetClass() == "prop_vehicle_jeep" then return true end
+		if scripted_ents.IsBasedOn(ent:GetClass(), "wac_hc_base") then return true end
+		
+		local isCar = hook.Call("Radio:IsCar", nil, ent)
+		if isCar != nil then return isCar end
+
+		return false
+	end
+
+	cachedIsCarResult[ent] = result()
 	
-	local isCar = hook.Call("Radio:IsCar", nil, self)
-	if isCar != nil then return isCar end
-
-    return false
+	return cachedIsCarResult[ent]
 end
 
-function ENT:CanHearInCarRadio(ply)
-	return 	ply:InVehicle() and 
-			( IsValid(ply:GetVehicle():GetParent()) and ply:GetVehicle():GetParent() == self or ply:GetVehicle() == self)
+function Radio.CanEdit(ply, ent)
+	if !IsValid(ent) then return false end
+	if !ply:Alive() then return false end
+	
+	local isCar = Radio.IsCar(ent);
+	local radio = ent:GetRadioComponent()
+
+	local maxDistance = isCar and 22500 or 100000
+
+	local canEdit = hook.Call("Radio:CanEdit", nil, ply, ent)
+	if canEdit == false then return false end
+
+	if ply:GetPos():DistToSqr(ent:GetPos()) > maxDistance then return false end
+
+	if isCar then
+		--Check he own the car or he can use it
+		if DarkRP and !ply:canKeysLock(ent) and !scripted_ents.IsBasedOn(ent:GetClass(), "wac_hc_base") then return false end
+		if FPP and !ent:CPPICanUse(ply) then return false end
+	end
+
+	if radio then
+		--Check property with FPP
+		local owner = ent.FPPOwner or ent.Owner
+		if FPP and radio:IsPrivate() and ( (radio:IsPrivateBuddy() and !ent:CPPICanUse(ply)) or (!radio:IsPrivateBuddy() and owner != ply) ) then return false end
+	end	
+
+	return true
 end
 
-function ENT:GetCurrentTimeRadio(niceTime, serverTime)
-	local ent = self:GetControlerRadio()
-	local time = CLIENT and !serverTime and self.station and self.station:GetTime() or CurTime() - ent:GetTimeStartRadio()
-	return niceTime and Radio.SecondsToClock( time ) or time
-end
+function Radio.IsCarHaveRadio(ent)
+	if ( !Radio.IsCar(ent) ) then return false end
+	if ( !ent:GetRadioComponent() ) then return false end
 
-function ENT:CanHearRadio(ply)
-    return ( self:IsCarRadio() and self:CanHearInCarRadio(ply) ) or ( (self.SWEPRadio and self:CanHearSwepRadio()) or self.ENTRadio or self.IsServer )
-end
-
-function ENT:CanHearSwepRadio()
-	return self.SWEPRadio and IsValid(self.Owner:GetActiveWeapon()) and self.Owner:GetActiveWeapon().SWEPRadio
-end
-
-function ENT:GetDurationRadio()
-	local ent = self:GetControlerRadio()
-	return ent:GetNWInt("Radio:Duration") or 0
-end
-
-function ENT:GetControlerRadio()
-	return self.SWEPRadio and self.LastStation or Entity(self:GetNWInt("Radio:Controler"))
-end
-
-function ENT:GetColorRadio()
-	return string.ToColor(self:GetNWString("Radio:Visual")) or color_white
-end
-
-function ENT:GetTimeStartRadio()
-    return self:GetNWInt("Radio:Time")
-end
-
-function ENT:IsPlayingLive()
-	local ent = self:GetControlerRadio()
-	return ent:GetNWString("Radio:Mode") == "3"
+	return true
 end

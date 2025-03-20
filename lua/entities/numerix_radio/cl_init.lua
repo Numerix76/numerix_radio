@@ -33,5 +33,5 @@ local InfoTable = {
 
 function ENT:Draw()
 	self:DrawModel()
-	self:Draw3DInfo(InfoTable)
+	Radio.Draw3DInfo(self, InfoTable)
 end

@@ -29,16 +29,17 @@ function PANEL:PerformLayout(width, height)
 end
 
 function PANEL:MakeContent(ent, type)
-	local radio = ent:GetControlerRadio()
+	local radio = ent:GetRadioComponent()
+	if ( !radio ) then return end
 	
 	self.Paint = function(s, w, h) 
-		if radio:GetNWString("Radio:Info") != "" then
+		if radio:GetInformation() != "" then
 			draw.DrawText(ent:GetNWString("Radio:Info"), "Radio.Menu", w/2, h/2 - 10, Radio.Color["text"], TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 			return
 		end
 
-		if radio:GetNWString("Radio:URL") == "" then
-			if radio != ent then
+		if radio:GetURL() == "" then
+			if radio:IsConnectedToServer() then
 				draw.SimpleText(Radio.GetLanguage("Waiting for a server music"), "Radio.Menu", w/2, h/2 - 10, Radio.Color["text"], TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 			else
 				draw.SimpleText(Radio.GetLanguage("Enter a Youtube/MP3/SoundCloud URL"), "Radio.Menu", w/2, h/2 - 10, Radio.Color["text"], TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
@@ -46,29 +47,26 @@ function PANEL:MakeContent(ent, type)
 		end
 	end
 	
-	local lastThumbnail = radio:GetNWString("Radio:Thumbnail")
+	local lastThumbnail = radio:GetMusicThumbnail()
 
 	local icon = vgui.Create("DImage", self)
 	icon:SetPos(5, 0)
 	icon:SetSize(self:GetTall() + 25, self:GetTall() - 5)
-
-	Radio.GetImage( radio:GetNWString("Radio:Thumbnail"), "thumbnail.jpg", function(url, filename)
+	Radio.GetImage( radio:GetMusicThumbnail(), "thumbnail.jpg", function(url, filename)
 		icon:SetImage(filename)
 	end)
 
 	self.Think = function()
-		radio = ent:GetControlerRadio()
-
-		if radio:GetNWString("Radio:Thumbnail") != lastThumbnail then
-			Radio.GetImage( radio:GetNWString("Radio:Thumbnail"), "thumbnail.jpg", function(url, filename)
+		if radio:GetMusicThumbnail() != lastThumbnail then
+			Radio.GetImage( radio:GetMusicThumbnail(), "thumbnail.jpg", function(url, filename)
 				if !IsValid(icon) then return end
 				icon:SetImage(filename)
-				lastThumbnail = radio:GetNWString("Radio:Thumbnail")
+				lastThumbnail = radio:GetMusicThumbnail()
 			end)
 		end
 
 		if IsValid(icon) then
-			if radio:GetNWString("Radio:URL") == "" or radio:GetNWString("Radio:Thumbnail") == "" then
+			if radio:GetURL() == "" or radio:GetMusicThumbnail() == "" then
 				icon:SetAlpha(0)
 			else
 				icon:SetAlpha(255)
@@ -76,35 +74,35 @@ function PANEL:MakeContent(ent, type)
 		end
 	end
 
-	local pause = !(radio and radio:IsPausedRadio())
-
+	local lastPauseState = radio:IsPaused()
     local PlayPauseButton = vgui.Create( "DImageButton", self )
     PlayPauseButton:SetSize( self:GetTall()/2, self:GetTall()/2 )			
     PlayPauseButton:SetPos( self:GetWide()/10, 0 )	
 	PlayPauseButton:SetText( "" )			
-    PlayPauseButton:SetImage( "numerix_radio/play.png" )
+    PlayPauseButton:SetImage(lastPauseState and "numerix_radio/play.png" or "numerix_radio/pause.png")
+	PlayPauseButton:SetTooltip(lastPauseState and Radio.GetLanguage("Pause") or Radio.GetLanguage("UnPause"))
     PlayPauseButton:CenterVertical(0.5)
     PlayPauseButton.Think = function( self )
-		if ent != radio or radio:GetNWString("Radio:URL") == "" then
+		if radio:IsConnectedToServer() or radio:GetURL() == "" then
 			self:SetAlpha(0)
 		else
 			self:SetAlpha(255)
         end
 
-		if ent and ent:IsPausedRadio() then
-            if !pause then
+		if radio:IsPaused() then
+            if !lastPauseState then
                 self:SetToolTip( Radio.GetLanguage("Pause") )
 
                 self:SetImage("numerix_radio/play.png")
-                pause = true
+                lastPauseState = true
             end
         else
-            if pause then
+            if lastPauseState then
                 self:SetToolTip(Radio.GetLanguage("UnPause") )
             
                 self:SetImage("numerix_radio/pause.png")
 
-                pause = false
+                lastPauseState = false
             end
         end
 	end
@@ -114,10 +112,10 @@ function PANEL:MakeContent(ent, type)
 		end
 	end
 	PlayPauseButton.DoClick = function()
-		if ent == radio and ent:GetNWString("Radio:URL") != "" then
+		if !radio:IsConnectedToServer() and radio:GetURL() != "" then
 			net.Start("Radio:PauseMusic")
 			net.WriteEntity(ent)
-			net.WriteBool(ent and ent.station and ent.station:GetState() != GMOD_CHANNEL_PAUSED or false)
+			net.WriteBool(!radio:IsPaused())
 			net.SendToServer()
 		end
     end
@@ -135,14 +133,14 @@ function PANEL:MakeContent(ent, type)
 		end
 	end
 	StopMusic.Think = function(self)
-		if ent != radio or radio:GetNWString("Radio:URL") == "" then
+		if radio:IsConnectedToServer() or radio:GetURL() == "" then
 			self:SetAlpha(0)
 		else
 			self:SetAlpha(255)
 		end
 	end
 	StopMusic.DoClick = function()
-		if ent == radio and ent:GetNWString("Radio:URL") != "" then
+		if !radio:IsConnectedToServer() and radio:GetURL() != "" then
 			net.Start("Radio:StopMusic")
 			net.WriteEntity(ent)
 			net.SendToServer()
@@ -157,22 +155,22 @@ function PANEL:MakeContent(ent, type)
     LoopMusic:SetImage( "numerix_radio/loop.png" )
     LoopMusic:CenterVertical(0.5)
 	LoopMusic.Paint = function( self, w, h )            
-		if self:IsHovered() or self:IsDown() or ent:GetNWBool("Radio:Loop") then
+		if self:IsHovered() or self:IsDown() or radio:IsLooping() then
 			draw.RoundedBox( 5, 0, 0, w, h, Radio.Color["button_hover"] )
 		end
 	end
 	LoopMusic.Think = function(self)
-		if ent != radio or radio:GetNWString("Radio:URL") == "" or radio:IsPlayingLive() then
+		if radio:IsConnectedToServer() or radio:GetURL() == "" or radio:IsLive() then
 			self:SetAlpha(0)
 		else
 			self:SetAlpha(255)
 		end
 	end
 	LoopMusic.DoClick = function()
-		if ent == radio and ent:GetNWString("Radio:URL") != "" and !radio:IsPlayingLive() then
+		if !radio:IsConnectedToServer() and radio:GetURL() != "" and !radio:IsLive() then
 			net.Start("Radio:ChangeLoopState")
 			net.WriteEntity(ent)
-			net.WriteBool(!ent:GetNWBool("Radio:Loop"))
+			net.WriteBool(!radio:IsLooping())
 			net.SendToServer()
 		end
 	end
@@ -185,11 +183,11 @@ function PANEL:MakeContent(ent, type)
     TimeInfo:CenterVertical(0.5)
     TimeInfo:CenterHorizontal(0.25)
 	TimeInfo.Think = function(self)
-		if ent.Playing then
-			if !radio:IsPlayingLive() then
-				self:SetText(Radio.SecondsToClock(ent.station:GetTime()).."/"..Radio.SecondsToClock(radio:GetNWInt("Radio:Duration")))	
+		if radio:IsPlaying() then
+			if !radio:IsLive() then
+				self:SetText(Radio.SecondsToClock(radio:GetCurrentTime(false)).."/"..Radio.SecondsToClock(radio:GetMusicDuration()))	
 			else
-				self:SetText(Radio.SecondsToClock(ent.station:GetTime()))
+				self:SetText(Radio.SecondsToClock(radio:GetCurrentTime(false)))
 			end
 
 			self:SetAlpha(255)
@@ -213,17 +211,17 @@ function PANEL:MakeContent(ent, type)
 	TimeSlider.Slider:SetPos(0,0)
 	TimeSlider.Slider:SetSize(TimeSlider:GetWide(), 40)
     TimeSlider:SetMin( 0 )				
-    TimeSlider:SetMax( ent:GetNWInt("Radio:Duration") )				
+    TimeSlider:SetMax( isnumber(radio:GetMusicDuration()) and radio:GetMusicDuration() or 0 )				
     TimeSlider:SetDecimals( 0 )	
-    TimeSlider:SetValue(CurTime() - ent:GetNWInt("Radio:Time"))
+    TimeSlider:SetValue(radio:GetCurrentTime(false) or 0)
     TimeSlider.TextArea:SetVisible(false)
 	TimeSlider.Think = function(s)
-		if ent.Playing and !radio:IsPlayingLive() then
+		if radio:IsPlaying() and !radio:IsLive() then
 			if( !s:IsEditing() ) then
-				s:SetValue(ent.station:GetTime())
+				s:SetValue(radio:GetCurrentTime(false))
 			end
 
-			s:SetMax( radio:GetNWInt("Radio:Duration") )		
+			s:SetMax( radio:GetMusicDuration() or 0 )		
 			s:SetAlpha(255)
             
 		else
@@ -236,10 +234,10 @@ function PANEL:MakeContent(ent, type)
 		s:CenterVertical(0.5)
 	end
 	TimeSlider.Slider.Think = function(self)
-		if ent.Playing and !radio:IsPlayingLive() then
+		if radio:IsPlaying() and !radio:IsLive() then
 			self:SetAlpha(255)
 		else
-			self:SetAlpha(255)
+			self:SetAlpha(0)
 		end
 	end
     TimeSlider.Slider.Paint = function(self, w, h)
@@ -259,22 +257,24 @@ function PANEL:MakeContent(ent, type)
 		end
 	end
 	function TimeSlider.Slider:OnMouseReleased( mcode )
-		if ent.Playing and radio:GetNWString("Radio:Mode") != "3" and Radio.Settings.Seek and ent == radio then
-			self:SetDragging( false );
-			self:MouseCapture( false );
+		if radio:IsPlaying() and !radio:IsLive() and Radio.Settings.Seek and !radio:IsConnectedToServer() then
+			
 
 			net.Start("Radio:SeekMusic")
 			net.WriteEntity(ent)
-			net.WriteString(self:GetSlideX() * ent:GetNWInt("Radio:Duration"))
+			net.WriteFloat(self:GetSlideX() * radio:GetMusicDuration())
 			net.SendToServer()
-		end			
+		end
+
+		self:SetDragging( false );
+		self:MouseCapture( false );
 	end
 	function TimeSlider.Slider.Knob:OnMouseReleased( mcode )
-		if ent.Playing and radio:GetNWString("Radio:Mode") != "3" and Radio.Settings.Seek and ent == radio then
+		if radio:IsPlaying() and !radio:IsLive() and Radio.Settings.Seek and !radio:IsConnectedToServer() then
 			net.Start("Radio:SeekMusic")
 			net.WriteEntity(ent)
-			net.WriteString(self:GetParent():GetSlideX() * ent:GetNWInt("Radio:Duration"))
-			net.SendToServer() 
+			net.WriteFloat(self:GetParent():GetSlideX() * radio:GetMusicDuration())
+			net.SendToServer()
 		end
 
 		return DLabel.OnMouseReleased( self, mcode );
@@ -288,7 +288,7 @@ function PANEL:MakeContent(ent, type)
     VolumeInfo:CenterVertical(0.5)
     VolumeInfo:CenterHorizontal(0.8)
 	VolumeInfo.Think = function(self)
-		if ent.Playing then
+		if radio:IsPlaying() then
 			self:SetAlpha(255)
 		else
 			self:SetAlpha(0)
@@ -299,7 +299,7 @@ function PANEL:MakeContent(ent, type)
     local VolumeSlider = vgui.Create( "DNumSlider", self )
     VolumeSlider:SetPos( x + VolumeInfo:GetWide() + 10, 0 )	
     VolumeSlider:SetSize( self:GetWide()/6, 40 )		
-    VolumeSlider:SetText( "" )	
+    VolumeSlider:SetText( "" )
 	VolumeSlider.Label:Dock(0)
 	VolumeSlider.Label:SetSize(0,0)	
 	VolumeSlider.Label:SetTextColor( Radio.Color["text"] )
@@ -312,11 +312,11 @@ function PANEL:MakeContent(ent, type)
     VolumeSlider:SetMin( 0 )				
     VolumeSlider:SetMax( 100 )				
     VolumeSlider:SetDecimals( 0 )	
-    VolumeSlider:SetValue(ent:GetNWInt("Radio:Volume"))
+    VolumeSlider:SetValue(radio:GetVolume())
 	VolumeSlider.TextArea:SetVisible(false)
     VolumeSlider:CenterVertical(0.5)	
 	VolumeSlider.Think = function(self)
-		if ent.Playing then
+		if radio:IsPlaying() then
 			self:SetAlpha(255)
 		else
 			self:SetAlpha(0)
@@ -344,20 +344,20 @@ function PANEL:MakeContent(ent, type)
 		self:SetDragging( false );
 		self:MouseCapture( false );
 
-		if ent:GetNWInt("Radio:Volume") == self:GetSlideX() then return end
+		if radio:GetVolume() == self:GetSlideX() then return end
         net.Start("Radio:UpdateVolume")
         net.WriteEntity(ent)
-        net.WriteString(self:GetSlideX() * 100)
-		net.SendToServer() 	
+        net.WriteUInt(self:GetSlideX() * 100, 7)
+		net.SendToServer()
 		
 	end
 	function VolumeSlider.Slider.Knob:OnMouseReleased( mcode )
 
-		if ent:GetNWInt("Radio:Volume") == self:GetParent():GetSlideX() then return end
+		if radio:GetVolume() == self:GetParent():GetSlideX() then return end
         net.Start("Radio:UpdateVolume")
         net.WriteEntity(ent)
-        net.WriteString(self:GetParent():GetSlideX())
-        net.SendToServer() 
+        net.WriteUInt(self:GetParent():GetSlideX(), 7)
+        net.SendToServer()
 
 		return DLabel.OnMouseReleased( self, mcode )
 

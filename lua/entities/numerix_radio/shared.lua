@@ -17,3 +17,7 @@ ENT.Spawnable       = true
 
 ENT.Model           = "models/sligwolf/grocel/radio/ghettoblaster.mdl"
 ENT.IsServer        = false
+
+function ENT:GetDefaultDistanceSound()
+	return Radio.Settings.DistanceSoundRadio^2
+end

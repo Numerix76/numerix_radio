@@ -71,7 +71,7 @@ function PANEL:MakeContent(ent, type)
 			end
 		end
 		ChangeMusic.DoClick = function()
-			ent:StartMusicRadio(url)
+			Radio.Play(url, ent)
 		end
 	
 	end

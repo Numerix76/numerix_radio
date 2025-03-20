@@ -14,14 +14,10 @@ function PANEL:PerformLayout(width, height)
 end
 
 function PANEL:MakeContent(ent)
-	local RadioMenu = self:GetParent():GetParent() 
 	local RadioContent = self
 
-	local radio = ent:GetControlerRadio()
-
-	self.Think = function()
-		radio = ent:GetControlerRadio()
-	end
+	local radio = ent:GetRadioComponent()
+	if ( !radio ) then return end
 
     RadioContent.Paint = function(self, w, h) end
 
@@ -32,7 +28,7 @@ function PANEL:MakeContent(ent)
 	Playing:SetTextColor(Radio.Color["text"])
 	Playing:SetFont("Radio.Menu")
 	Playing.Think = function(self)
-		if ent.Playing then
+		if radio:IsPlaying() then
 			self:SetAlpha(255)
 		else
 			self:SetAlpha(0)
@@ -42,15 +38,15 @@ function PANEL:MakeContent(ent)
 	local Title = vgui.Create( "DLabel", RadioContent )
 	Title:SetPos( 20, 70 )
 	Title:SetSize( RadioContent:GetWide()/2-25, 50 )
-	Title:SetText( Radio.GetLanguage("Title : ")..radio:GetNWString("Radio:Title") )
+	Title:SetText( Radio.GetLanguage("Title : ")..radio:GetMusicTitle() )
 	Title:SetTextColor(Radio.Color["text"])
 	Title:SetFont("Radio.Menu")
 	Title.Think = function(self)
-		if ent.Playing then
-			if radio:IsPlayingLive() then
+		if radio:IsPlaying() then
+			if radio:IsLive() then
 				self:SetText( Radio.GetLanguage("Radio Internet") )
 			else
-				self:SetText( Radio.GetLanguage("Title : ")..radio:GetNWString("Radio:Title") )
+				self:SetText( Radio.GetLanguage("Title : ")..radio:GetMusicTitle() )
 			end
 
 			self:SetAlpha(255)
@@ -62,12 +58,12 @@ function PANEL:MakeContent(ent)
 	local Author = vgui.Create( "DLabel", RadioContent )
 	Author:SetPos( 20, 90 )
 	Author:SetSize( RadioContent:GetWide()/2-25, 50 )
-	Author:SetText( Radio.GetLanguage("Author : ")..radio:GetNWString("Radio:Author") )
+	Author:SetText( Radio.GetLanguage("Author : ")..radio:GetMusicAuthor() )
 	Author:SetTextColor(Radio.Color["text"])
 	Author:SetFont("Radio.Menu")
 	Author.Think = function(self)
-		if ent.Playing and !radio:IsPlayingLive() then
-			self:SetText( Radio.GetLanguage("Author : ")..radio:GetNWString("Radio:Author") )
+		if radio:IsPlaying() and !radio:IsLive() then
+			self:SetText( Radio.GetLanguage("Author : ")..radio:GetMusicAuthor() )
 
 			self:SetAlpha(255)
 		else
@@ -76,7 +72,7 @@ function PANEL:MakeContent(ent)
 	end
 	
 	local SetURL
-	if (ent.IsServer and !Radio.Settings.ActivePresetOnlyServer) or ( ( ent:IsCarRadio() or ent.ENTRadio or ent.SWEPRadio ) and !Radio.Settings.ActivePresetOnlyRadio ) then
+	if (radio:IsServer() and !Radio.Settings.ActivePresetOnlyServer) or (!radio:IsServer() and !Radio.Settings.ActivePresetOnlyRadio) then
 		SetURL = vgui.Create( "DTextEntry", RadioContent )
 		SetURL:SetPos( 5, 10 )
 		SetURL:SetSize( RadioContent:GetWide()/2-10, 30 )
@@ -89,8 +85,7 @@ function PANEL:MakeContent(ent)
 		SetURL:SetTextColor( Radio.Color["text"] )
 		function SetURL:OnEnter()
 			local url = self:GetValue()
-			url = string.Replace(url, " ", "")
-			ent:StartMusicRadio(url)
+			Radio.Play(url, ent)
 
 			if IsValid(ServerList) then
 				for k, line in pairs( ServerList:GetLines() ) do
@@ -108,7 +103,7 @@ function PANEL:MakeContent(ent)
 		end
 	end
 
-	if !ent.IsServer then
+	if !radio:IsServer() then
 		local connect = vgui.Create("Radio_Connect", RadioContent)
 		connect:SetPos(RadioContent:GetWide()/2, 10)
 		connect:SetSize(RadioContent:GetWide()/2 - 5, RadioContent:GetTall() - 10)

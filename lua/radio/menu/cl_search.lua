@@ -139,7 +139,7 @@ function Radio.ReloadMenu(menu, type, ent, error)
             end
         end
 		ChangeMusic.DoClick = function()
-    		ent:StartMusicRadio(v.url)
+    		Radio.Play(v.url, ent)
 		end
 	end
 	
@@ -153,10 +153,10 @@ function toURI(c)
 	return string.format ("%%%02X", string.byte(c))
 end
  
- function Radio.GetSearch(type, search, menu, ent)
+function Radio.GetSearch(type, search, menu, ent)
 	search = string.Replace( string.gsub(search, "([^%w ])", toURI), " ", "%20")
 
-	http.Fetch("http://92.222.234.121:3000/search/".. (type == 1 and "youtube" or "soundcloud").. "/" ..search, 
+	http.Fetch("http://81.16.177.58:3000/search/".. (type == 1 and "youtube" or "soundcloud").. "/" ..search, 
 		function( body, len, headers, code )
 			local data = util.JSONToTable(body)
 			

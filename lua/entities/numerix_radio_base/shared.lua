@@ -11,14 +11,6 @@ ENT.Category		= "Numerix Scripts"
 ENT.Author			= "Numerix"
 ENT.Contact			= "https://steamcommunity.com/id/numerix/"
 ENT.Purpose			= ""
-ENT.Instructions	= ""					
+ENT.Instructions	= ""
 ENT.Spawnable 		= false
-ENT.IsAdmin			= false
-
-function ENT:SetupDataTables()
-	self:InitRadio()
-end
-
-function ENT:Think()
-	self:ThinkRadio()
-end
+ENT.IsServer        = false

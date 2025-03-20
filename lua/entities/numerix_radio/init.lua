@@ -9,4 +9,4 @@ AddCSLuaFile( "shared.lua" )
 
 include("shared.lua")
 
-ENT.health = Radio.Settings.RadioHealth
+ENT.StartHealth = Radio.Settings.RadioHealth

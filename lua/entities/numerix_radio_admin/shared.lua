@@ -18,4 +18,7 @@ ENT.Admin 			= true
 
 ENT.Model           = "models/props_lab/servers.mdl"
 ENT.IsServer        = true
-ENT.IsAdmin 		= true
+
+function ENT:GetDefaultDistanceSound()
+	return -1
+end

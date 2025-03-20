@@ -14,11 +14,13 @@ function PANEL:PerformLayout(width, height)
 end
 
 function PANEL:MakeContent(ent)
+	local radio = ent:GetRadioComponent()
+	if ( !radio ) then return end
 
     self.Paint = function(self, w, h) end
 
-    local selectedstation
-	local selectedindex
+    local selectedServer
+	local selectedPanel
 	ServerList = vgui.Create( "DListView", self )
     ServerList:SetPos(0, 0)					
 	ServerList:SetSize(self:GetWide(), self:GetTall()/1.08)
@@ -47,11 +49,12 @@ function PANEL:MakeContent(ent)
         draw.RoundedBox( 0, 0, 0, w, h, Radio.Color["scroll_bar"] )
 	end
 
-    for station, _ in pairs(Radio.AllServer) do
-		if !IsValid(station) then continue end
+    for _, server in ipairs(ents.FindByClass("numerix_radio_component")) do
+		if !IsValid(server) then continue end
+		if !server:IsServer() then continue end
 		
-        local pnl = ServerList:AddLine(station == ent:GetControlerRadio() and Radio.GetLanguage("Yes") or Radio.GetLanguage("No") , station:GetNWString("Radio:StationName"), station:GetNWString("Radio:Title"),station:GetNWString("Radio:Author"))
-		pnl.ent = station
+        local pnl = ServerList:AddLine(server == radio:GetController() and Radio.GetLanguage("Yes") or Radio.GetLanguage("No"), server:GetServerName(), server:GetMusicTitle(), server:GetMusicAuthor())
+		pnl.server = server
 	end
 	
 	for _, columns in ipairs(ServerList.Columns) do
@@ -71,8 +74,8 @@ function PANEL:MakeContent(ent)
 	end
 
 	ServerList.OnRowSelected = function( lst, index, pnl )
-        selectedstation = pnl.ent
-		selectedindex = pnl
+        selectedServer = pnl.server
+		selectedPanel = pnl
 	end
 	
 	local Connect = vgui.Create( "DButton", self )		
@@ -90,18 +93,18 @@ function PANEL:MakeContent(ent)
 		end
 	end
 	Connect.DoClick = function()
-		if !IsValid(selectedstation) then return end
+		if !IsValid(selectedServer) then return end
+		
 		net.Start("Radio:ConnectRadio")
 		net.WriteEntity(ent)
-		net.WriteEntity(selectedstation)
-		net.WriteBool(true)
+		net.WriteEntity(selectedServer:GetParent())
 		net.SendToServer()
 
 		for k, line in ipairs( ServerList:GetLines() ) do
 			line:SetColumnText( 1, Radio.GetLanguage("No") )
 		end
 
-		selectedindex:SetColumnText( 1, Radio.GetLanguage("Yes") )
+		selectedPanel:SetColumnText( 1, Radio.GetLanguage("Yes") )
 	end
 
 	local Disconnect = vgui.Create( "DButton", self )		
@@ -122,7 +125,6 @@ function PANEL:MakeContent(ent)
         net.Start("Radio:ConnectRadio")
         net.WriteEntity(ent)
         net.WriteEntity(nil)
-        net.WriteBool(false)
 		net.SendToServer()
 		
 		for k, line in ipairs( ServerList:GetLines() ) do

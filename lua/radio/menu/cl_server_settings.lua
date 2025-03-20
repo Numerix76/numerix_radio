@@ -15,6 +15,9 @@ end
 
 function PANEL:MakeContent(ent, type)
 
+	local radio = ent:GetRadioComponent()
+	if ( !radio ) then return end
+
 	self.Paint = function(s, w, h) end
 
     local StationName = vgui.Create( "DLabel", self )
@@ -33,7 +36,7 @@ function PANEL:MakeContent(ent, type)
     NameEntry:SetCursorColor( Radio.Color["text"] )
     NameEntry:SetPlaceholderColor( Radio.Color["text_placeholder"] )
     NameEntry:SetTextColor( Radio.Color["text"] )
-	NameEntry:SetText(ent:GetNWString("Radio:StationName"))
+	NameEntry:SetText(radio:GetServerName())
 	function NameEntry:OnEnter()
 		net.Start("Radio:SetNameServer")
 		net.WriteEntity(ent)
@@ -72,7 +75,7 @@ function PANEL:MakeContent(ent, type)
 
 	local Viewer = vgui.Create( "DLabel", self )
 	Viewer:SetPos( 0, 70 )
-	Viewer:SetText( string.format(Radio.GetLanguage("Auditors : %i"), ent:GetNWInt("Radio:Viewer")) )
+	Viewer:SetText( string.format(Radio.GetLanguage("Auditors : %i"), radio:GetListeners()) )
 	Viewer:SetTextColor( Radio.Color["text"] )
 	Viewer:SetFont("Radio.Menu")
 	Viewer:SizeToContents()
@@ -82,7 +85,7 @@ function PANEL:MakeContent(ent, type)
 	voice:SetText( Radio.GetLanguage("Transmit voice ?") )
 	voice:SetTextColor(Radio.Color["text"])
 	voice:SetFont("Radio.Menu")
-	voice:SetValue( ent:GetNWBool("Radio:Voice") )
+	voice:SetValue( radio:IsVoiceEnabled() )
 	function voice:OnChange(bVal)
 		net.Start("Radio:TransmitVoice")
 		net.WriteEntity(ent)

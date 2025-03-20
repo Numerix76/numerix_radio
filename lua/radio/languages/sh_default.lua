@@ -4,7 +4,7 @@ Radio made by Numerix (https://steamcommunity.com/id/numerix/)
 
 --------------------------------------------------------------------------------------------------]]
 
-Radio.Language.VersionDefault = "2.0.3" --DON'T TOUCH THIS
+Radio.Language.VersionDefault = "2.0.4" --DON'T TOUCH THIS
 
 Radio.Language["default"] = {
 	["The file does not exist."] = "The file does not exist.",
@@ -78,5 +78,8 @@ Radio.Language["default"] = {
 	["Downloading the video on the server."] = "Downloading the video on the server.",
 	["The server IP seems to be banned from the google video services. Please contact the server owner."] = "The server IP seems to be banned from the google video services. Please contact the server owner.",
 	["An error occured while downloading the file. (%s)"] = "An error occured while downloading the file. (%s)",
-	["Starting the upload of the video to the backend."] = "Starting the upload of the video to the backend."
+	["Starting the upload of the video to the backend."] = "Starting the upload of the video to the backend.",
+
+	["The vehicle already have a radio."] = "The vehicle already have a radio.",
+	["You already have a radio on you."] = "You already have a radio on you."
 }

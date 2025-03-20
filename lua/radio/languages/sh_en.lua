@@ -76,5 +76,8 @@ Radio.Language["en"] = {
 	["Downloading the video on the server."] = "Downloading the video on the server.",
 	["The server IP seems to be banned from the google video services. Please contact the server owner."] = "The server IP seems to be banned from the google video services. Please contact the server owner.",
 	["An error occured while downloading the file. (%s)"] = "An error occured while downloading the file. (%s)",
-	["Starting the upload of the video to the backend."] = "Starting the upload of the video to the backend."
+	["Starting the upload of the video to the backend."] = "Starting the upload of the video to the backend.",
+
+	["The vehicle already have a radio."] = "The vehicle already have a radio.",
+	["You already have a radio on you."] = "You already have a radio on you."
 }

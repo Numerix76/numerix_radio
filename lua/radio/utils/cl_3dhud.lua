@@ -10,20 +10,22 @@ local p
 local prevFrame = {}
 local bar = 128
 local color
-function ENT:Draw3DInfo(InfoTable)
-	if LocalPlayer():GetPos():DistToSqr( self:GetPos() ) > 400^2 then return end
+function Radio.Draw3DInfo(ent, InfoTable)
+	if LocalPlayer():GetPos():DistToSqr( ent:GetPos() ) > 400^2 then return end
 
 	local bar_w = math.Round(InfoTable.InfoMaxWFFT/(bar+1))
-	local radio = self:GetControlerRadio()
+	local radio = ent:GetRadioComponent()
 
-	if !self.SWEPRadio then
-		p = self:GetPos()
-		p = p + self:GetForward() * InfoTable.InfoPos.x
-		p = p + self:GetRight() * InfoTable.InfoPos.y
-		p = p + self:GetUp() * InfoTable.InfoPos.z
-		p = p + self:GetForward() * -1
+	if ( !radio ) then return end
 
-		a = self:GetAngles()
+	if !ent:IsWeapon() then
+		p = ent:GetPos()
+		p = p + ent:GetForward() * InfoTable.InfoPos.x
+		p = p + ent:GetRight() * InfoTable.InfoPos.y
+		p = p + ent:GetUp() * InfoTable.InfoPos.z
+		p = p + ent:GetForward() * -1
+
+		a = ent:GetAngles()
 		a:RotateAroundAxis( a:Up(), InfoTable.InfoAng.y )
 		a:RotateAroundAxis( a:Right(), InfoTable.InfoAng.p)
 		a:RotateAroundAxis( a:Forward(), InfoTable.InfoAng.r )
@@ -31,25 +33,26 @@ function ENT:Draw3DInfo(InfoTable)
 		p = InfoTable.InfoPos
 		a = InfoTable.InfoAng
 	end
-	
-	color = self:GetColorRadio()
+
+	color = radio:GetVisualColor()
 
 	if InfoTable.InfoBlackPosX then
-		cam.Start3D2D( p + self:GetForward() * InfoTable.InfoBlackPosBack, a, InfoTable.InfoOffsetText );
+		cam.Start3D2D( p + ent:GetForward() * InfoTable.InfoBlackPosBack, a, InfoTable.InfoOffsetText );
 			surface.SetDrawColor(color_black)
 			surface.DrawRect(InfoTable.InfoBlackPosX, InfoTable.InfoBlackPosY, InfoTable.InfoBlackPosW, InfoTable.InfoBlackPosH)
 		cam.End3D2D()
 	end
 
+	local station = radio:GetStation()
 	--Draw FFT vizualizer
-	if self.station and IsValid(self.station) then
+	if station and IsValid(station) then
 		cam.Start3D2D( p, a, InfoTable.InfoOffsetFFT )
-			if !self.FTT then
-				self.FTT = {}
+			if !ent.FTT then
+				ent.FTT = {}
 			end
 			
-			if( self.station:GetState() == GMOD_CHANNEL_PLAYING ) then
-				self.station:FFT(self.FTT, FFT_256)
+			if( station:GetState() == GMOD_CHANNEL_PLAYING ) then
+				station:FFT(ent.FTT, FFT_256)
 			
 				surface.SetDrawColor(color)
 			
@@ -59,9 +62,9 @@ function ENT:Draw3DInfo(InfoTable)
 					end
 
 					if not prevFrame[i] then prevFrame[i] = 0 end
-					prevFrame[i] = math.Clamp(Lerp(2.5 * FrameTime(), prevFrame[i], -self.FTT[i] * 1000 * self:GetNWInt("Radio:Volume")), -InfoTable.InfoMaxHFFT, 0 )
+					prevFrame[i] = math.Clamp(Lerp(2.5 * FrameTime(), prevFrame[i], -ent.FTT[i] * 1000 * radio:GetVolume()), -InfoTable.InfoMaxHFFT, 0 )
 
-					if self:GetNWBool("Radio:Rainbow") then
+					if radio:IsRainbow() then
 						local c = HSVToColor( i * 360 / bar, 1, 1 );
 						surface.SetDrawColor( c ); --Rainbow 
 					end
@@ -75,15 +78,15 @@ function ENT:Draw3DInfo(InfoTable)
 
 		surface.SetFont( "Radio.Video.Info" )
 
-		if self:GetNWInt("Radio:Info") != "" then
+		if radio:GetInformation() != "" then
 			surface.SetTextColor( Radio.Color["text_info"] )
 			surface.SetTextPos( InfoTable.InfoPosXText, InfoTable.InfoPosYTextError )
-			surface.DrawText( self:GetNWInt("Radio:Info") )	
-		elseif self.station and IsValid(self.station) then
+			surface.DrawText( radio:GetInformation() )	
+		elseif station and IsValid(station) then
 			surface.SetTextColor( Radio.Color["text"] )
 			surface.SetTextPos( InfoTable.InfoPosXText, InfoTable.InfoPosYText )
 
-			local Title = radio:GetNWString("Radio:Title")
+			local Title = radio:GetMusicTitle()
 			local w, _ = surface.GetTextSize( Title );
 			if( w > InfoTable.InfoMaxWText ) then
 
@@ -105,7 +108,7 @@ function ENT:Draw3DInfo(InfoTable)
 
 			surface.SetTextPos( InfoTable.InfoPosXText, InfoTable.InfoPosYText + 20 )
 
-			local Author = radio:GetNWString("Radio:Author")
+			local Author = radio:GetMusicAuthor()
 			local w, _ = surface.GetTextSize( Author );
 			if( w > InfoTable.InfoMaxWText ) then
 
@@ -125,10 +128,10 @@ function ENT:Draw3DInfo(InfoTable)
 				surface.DrawText( Author );
 			end
 
-			if radio:GetNWInt("Radio:Duration") != 0 then
-				if !radio:IsPlayingLive() then
+			if radio:GetMusicDuration() != 0 then
+				if !radio:IsLive() then
 					surface.SetDrawColor(color)
-					surface.DrawRect( InfoTable.InfoPosXTimeBar, InfoTable.InfoPosYTimeBar, InfoTable.InfoMaxWTimeBar*radio:GetCurrentTimeRadio(false)/radio:GetDurationRadio(), 5)
+					surface.DrawRect( InfoTable.InfoPosXTimeBar, InfoTable.InfoPosYTimeBar, InfoTable.InfoMaxWTimeBar*radio:GetCurrentTime(false)/radio:GetMusicDuration(), 5)
 				else
 					surface.SetTextColor( Radio.Color["text"] )
 					surface.SetTextPos( InfoTable.InfoPosXText, InfoTable.InfoPosYTextError )
@@ -138,14 +141,14 @@ function ENT:Draw3DInfo(InfoTable)
 		end
 	cam.End3D2D()
 
-	if self.IsServer then
-		p = self:GetPos()
-		p = p + self:GetForward() * InfoTable.InfoPosVoice.x
-		p = p + self:GetRight() * InfoTable.InfoPosVoice.y
-		p = p + self:GetUp() * InfoTable.InfoPosVoice.z
-		p = p + self:GetForward() * -1
+	if ent.IsServer then
+		p = ent:GetPos()
+		p = p + ent:GetForward() * InfoTable.InfoPosVoice.x
+		p = p + ent:GetRight() * InfoTable.InfoPosVoice.y
+		p = p + ent:GetUp() * InfoTable.InfoPosVoice.z
+		p = p + ent:GetForward() * -1
 
-		a = self:GetAngles()
+		a = ent:GetAngles()
 		a:RotateAroundAxis( a:Up(), InfoTable.InfoAngVoice.y )
 		a:RotateAroundAxis( a:Right(), InfoTable.InfoAngVoice.p)
 		a:RotateAroundAxis( a:Forward(), InfoTable.InfoAngVoice.r )
@@ -157,8 +160,8 @@ function ENT:Draw3DInfo(InfoTable)
 
 			surface.SetDrawColor( Radio.Color["voice_background"] );
 			surface.DrawRect(InfoTable.InfoVoiceBackX, InfoTable.InfoVoiceBackY, InfoTable.InfoVoiceBackW, InfoTable.InfoVoiceBackH)
-			if( radio:GetNWBool('Radio:Voice') ) then
-				if( LocalPlayer().RadioVoice and ( LocalPlayer():GetPos():DistToSqr( self:GetPos() ) < 50000 ) ) then
+			if( radio:IsVoiceEnabled() ) then
+				if( LocalPlayer().RadioVoice and ( LocalPlayer():GetPos():DistToSqr( ent:GetPos() ) < 50000 ) ) then
 					surface.SetTextColor( Radio.Color["voice_active"] );
 				else
 					surface.SetTextColor( Radio.Color["voice_enable"] );

@@ -3,14 +3,13 @@
 Radio made by Numerix (https://steamcommunity.com/id/numerix/)
 
 --------------------------------------------------------------------------------------------------]]
-function Radio.OpenStreamMenu()
+function Radio.OpenStreamMenu(ent)
 	
-	if IsValid(RadioBase) then
-		RadioBase:Close()
+	if IsValid(RadioMenu) then
+		RadioMenu:Close()
 	end
 
-    local ent =  net.ReadEntity()
-	local radio = ent:GetControlerRadio()
+	if ( !ent:GetRadioComponent() ) then return end
 
 	local RadioMenu = vgui.Create( "DFrame" )
 	RadioMenu:SetSize(ScrW(), ScrH())
@@ -20,15 +19,17 @@ function Radio.OpenStreamMenu()
 	RadioMenu:ShowCloseButton( false ) 
 	RadioMenu:SetTitle( " " )
 	RadioMenu.Paint = function() end
-	RadioMenu.Think = function ()
-		radio = ent:GetControlerRadio()
+	RadioMenu.Think = function(self) 
+		if !IsValid( ent ) or !IsValid( ent:GetRadioComponent() ) then 
+			self:Close()
+		end
 	end
 
     local RadioBase = vgui.Create( "DPanel", RadioMenu )
 	RadioBase:SetSize(ScrW()/1.5, ScrH()/1.5)
 	RadioBase:CenterHorizontal(0.6)
 	RadioBase:CenterVertical(0.5)
-	RadioBase.Paint = function( self, w, h )	
+	RadioBase.Paint = function( self, w, h )
 		draw.RoundedBox(10, 0, 0, w, h, Radio.Color["frame_background"])
 		draw.RoundedBoxEx(10, 0, 0, w, h/10, Radio.Color["frame_top"], true, true)
 		
@@ -69,4 +70,8 @@ function Radio.OpenStreamMenu()
 	RadioFoot:SetSize(RadioBase:GetWide(), RadioBase:GetTall() - (y + Radio.RadioContent:GetTall() + 10 ) )
 	RadioFoot:MakeContent(ent)
 end
-net.Receive("Radio:OpenStreamMenu", Radio.OpenStreamMenu)
+
+net.Receive("Radio:OpenStreamMenu", function()
+	local ent = net.ReadEntity()
+	Radio.OpenStreamMenu(ent)
+end)

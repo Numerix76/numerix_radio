@@ -15,6 +15,9 @@ end
 
 function PANEL:MakeContent(ent, type)
 
+	local radio = ent:GetRadioComponent()
+	if ( !radio ) then return end
+
 	self.Paint = function(s, w, h) end
 
 	local Mixer = vgui.Create("DColorMixer", self)
@@ -23,14 +26,14 @@ function PANEL:MakeContent(ent, type)
 	Mixer:SetPalette(true)  			
 	Mixer:SetAlphaBar(false) 			
 	Mixer:SetWangs(false) 				
-	Mixer:SetColor(string.ToColor(ent:GetNWString("Radio:Visual")))	
+	Mixer:SetColor( radio:GetVisualColor() )	
 
 	local rainbow = vgui.Create( "DCheckBoxLabel", self )
 	rainbow:SetPos( 5, 5 + self:GetTall()/1.4 ) 
 	rainbow:SetText( Radio.GetLanguage("Rainbow mode ?") )
 	rainbow:SetTextColor(Radio.Color["text"])
 	rainbow:SetFont("Radio.Menu")
-	rainbow:SetValue( ent:GetNWBool("Radio:Rainbow") )
+	rainbow:SetValue( radio:IsRainbow() )
 	
 	local Private
 	local Buddy
@@ -40,14 +43,14 @@ function PANEL:MakeContent(ent, type)
 		Private:SetText( Radio.GetLanguage("Private radio ?") )
 		Private:SetTextColor(Radio.Color["text"])
 		Private:SetFont("Radio.Menu")
-		Private:SetValue( ent:GetNWBool("Radio:Private") )
+		Private:SetValue( radio:IsPrivate() )
 
 		Buddy = vgui.Create( "DCheckBoxLabel", self )
 		Buddy:SetPos( 5, 5 + self:GetTall()/1.4 + rainbow:GetTall() + Private:GetTall() ) 
 		Buddy:SetText( Radio.GetLanguage("Allow buddy (FPP) to use radio ?") )
 		Buddy:SetTextColor(Radio.Color["text"])
 		Buddy:SetFont("Radio.Menu")
-		Buddy:SetValue( ent:GetNWBool("Radio:PrivateBuddy") )
+		Buddy:SetValue( radio:IsPrivateBuddy() )
 		Buddy.Think = function(self)
 			if Private:GetChecked() then
 				self:SetAlpha(255)

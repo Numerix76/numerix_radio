@@ -47,6 +47,56 @@ SWEP.SlotPos				= 1
 SWEP.DrawAmmo				= false
 SWEP.DrawCrosshair			= false
 
+function SWEP:Initialize()
+	self:SetHoldType("melee")
+
+	if SERVER then
+		local radio = ents.Create("numerix_radio_component")
+		radio:SetParent(self)
+		radio:SetMaxDistanceSound( Radio.Settings.DistanceSoundRadio^2 )
+		radio:Spawn()
+	end
+	
+	// other initialize code goes here
+	if CLIENT then
+	
+		// Create a new table for every weapon instance
+		self.VElements = table.FullCopy( self.VElements )
+		self.WElements = table.FullCopy( self.WElements )
+		self.ViewModelBoneMods = table.FullCopy( self.ViewModelBoneMods )
+		self:CreateModels(self.VElements) // create viewmodels
+		self:CreateModels(self.WElements) 
+
+		if IsValid(self.Owner) then
+			local vm = self.Owner:GetViewModel()
+			if IsValid(vm) then
+				self:ResetBonePositions(vm)
+
+				if (self.ShowViewModel == nil or self.ShowViewModel) then
+					vm:SetColor(Color(255,255,255,255))
+				else
+					vm:SetColor(Color(255,255,255,1))		
+				end
+			end
+		end
+	end
+end
+
+function SWEP:Holster()
+	if CLIENT and IsValid(self.Owner) then
+		local vm = self.Owner:GetViewModel()
+		if IsValid(vm) then
+			self:ResetBonePositions(vm)
+		end
+	end
+	
+	return true
+end
+
+function SWEP:OnRemove()
+	self:Holster()
+end
+
 function SWEP:PrimaryAttack()
 	if not IsFirstTimePredicted() then return end
 
@@ -68,36 +118,31 @@ function SWEP:SecondaryAttack()
 
 	if self.Owner:GetPos():DistToSqr( trace.HitPos) > 22500 then return end
 
+	local radio = self:GetRadioComponent()
+
 	if SERVER then
-		if self.IsBeingDrop then return end
-		if trace.Entity:IsCarRadio(trace.Entity) and (!trace.Entity:CanModificateRadio(self.Owner, trace.Entity) or trace.Entity:GetNWBool("Radio:HasRadio")) then return end 
-		
-		self.IsBeingDrop = true
-		local radio = Radio.Settings.EnableVehicle and trace.Entity:IsCarRadio() and trace.Entity or Radio.Settings.EnableEntity and ents.Create( "numerix_radio" ) or nil
+		if ( Radio.Settings.EnableVehicle and Radio.IsCar(trace.Entity) ) then 
+			if !Radio.CanEdit(self.Owner, trace.Entity) then return end 
 
-		if !IsValid(radio) then return end
-
-		if isentity(radio) and !radio:IsCarRadio() then
-			radio:SetPos( trace.HitPos )
-			radio:Spawn()
-			if FPP then
-				radio:CPPISetOwner(self.Owner)
+			if ( Radio.IsCarHaveRadio(trace.Entity) ) then
+				self.Owner:RadioChatInfo(Radio.GetLanguage("The vehicle already have a radio."), Radio.Chat.INFO)
+				return
 			end
 
-			radio:SetColor(string.ToColor(self:GetNWString("Radio:Color")))
-		elseif radio:IsCarRadio() and !radio:GetNWBool("Radio:HasRadio") then
-			radio:SetNWBool("Radio:HasRadio", true)
-			Radio.AllRadio[radio] = true
-	
-			net.Start("Radio:SendVehicleData")
-			net.WriteEntity(radio)
-			net.Broadcast()
+			trace.Entity:SetRadioComponent(radio)
+		elseif ( Radio.Settings.EnableEntity and !Radio.IsCar(trace.Entity) ) then
+			local ent = ents.Create( "numerix_radio" )
+			ent:SetPos( trace.HitPos )
+			ent:Spawn()
+			if FPP then
+				ent:CPPISetOwner(self.Owner)
+			end
+
+			ent:SetColor(radio:GetColor())
+			ent:SetRadioComponent(radio)
 		end
 
-		timer.Simple(0.1, function()		
-			self:ChangeModRadio(self.Owner, radio)
-			self.Owner:StripWeapon( self:GetClass() )
-		end)
+		self.Owner:StripWeapon( self:GetClass() )
 	end
 end
 
@@ -149,14 +194,14 @@ local function DrawRadioInfo(self, pos, ang)
 	InfoTableWorld.InfoPos = pos
 	InfoTableWorld.InfoAng = ang
 
-	self:Draw3DInfo(InfoTableWorld)
+	Radio.Draw3DInfo(self, InfoTableWorld)
 end
 
 local function DrawRadioInfo_View(self, pos, ang)
 	InfoTableView.InfoPos = pos
 	InfoTableView.InfoAng = ang
 
-	self:Draw3DInfo(InfoTableView)
+	Radio.Draw3DInfo(self, InfoTableView)
 end
 
 SWEP.ViewModelBoneMods = {
@@ -189,67 +234,10 @@ SWEP.VElements = {
 	["info"] = { type = "Quad", bone = "ValveBiped.Bip01", rel = "radio", pos = Vector(1.1, 2.374, 3.789), angle = Angle(0, 90, 90), size = 0.02, draw_func = DrawRadioInfo_View},
 }
 
-function SWEP:Initialize()
-	self:SetHoldType("melee")
-	
-	self.SWEPRadio = true
-	self:InitRadio()
-	
-	// other initialize code goes here
-	if CLIENT then
-	
-		// Create a new table for every weapon instance
-		self.VElements = table.FullCopy( self.VElements )
-		self.WElements = table.FullCopy( self.WElements )
-		self.ViewModelBoneMods = table.FullCopy( self.ViewModelBoneMods )
-		self:CreateModels(self.VElements) // create viewmodels
-		self:CreateModels(self.WElements) 
-
-		if IsValid(self.Owner) then
-			local vm = self.Owner:GetViewModel()
-			if IsValid(vm) then
-				self:ResetBonePositions(vm)
-				
-
-				if (self.ShowViewModel == nil or self.ShowViewModel) then
-					vm:SetColor(Color(255,255,255,255))
-				else
-					vm:SetColor(Color(255,255,255,1))		
-				end
-			end
-		end
-		
-	end
-end
-
-function SWEP:Holster()
-	if CLIENT and IsValid(self.Owner) then
-		local vm = self.Owner:GetViewModel()
-		if IsValid(vm) then
-			self:ResetBonePositions(vm)
-		end
-	end
-
-	if self.station and IsValid(self.station) then
-		self.station:SetVolume(0)
-	end
-	
-	return true
-end
-
-function SWEP:OnRemove()
-	self:Holster()
-	
-	if SERVER then
-		Radio.AllRadio[self] = nil	
-		
-		self:DeleteRadio()
-	end
-end
-
 if CLIENT then
 	SWEP.vRenderOrder = nil
 	function SWEP:ViewModelDrawn()
+		if true then return end
 		
 		local vm = self.Owner:GetViewModel()
 		if !IsValid(vm) then return end
@@ -315,8 +303,8 @@ if CLIENT then
 				if (v.surpresslightning) then
 					render.SuppressEngineLighting(true)
 				end
-	
-				local color = string.ToColor(self:GetNWString("Radio:Color"))
+				
+				local color = self:GetRadioComponent():GetColor()
 				render.SetColorModulation(color.r/255,color.g/255, color.b/255 )
 				model:DrawModel()
 				render.SetBlend(1)
@@ -349,7 +337,7 @@ if CLIENT then
 	end
 	SWEP.wRenderOrder = nil
 	function SWEP:DrawWorldModel()
-		
+		if true then return end
 		if (self.ShowWorldModel == nil or self.ShowWorldModel) then
 			self:DrawModel()
 		end
@@ -424,7 +412,7 @@ if CLIENT then
 					render.SuppressEngineLighting(true)
 				end
 				
-				local color = string.ToColor(self:GetNWString("Radio:Color"))
+				local color = string.ToColor(self:GetRadioComponent():GetColor())
 				render.SetColorModulation(color.r/255,color.g/255, color.b/255 )
 				model:DrawModel()
 				render.SetBlend(1)

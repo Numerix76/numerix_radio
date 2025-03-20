@@ -11,8 +11,7 @@ Radio.Language = Radio.Language or {}
 
 Radio.Color = Radio.Color or {}
 
-Radio.AllRadio  = Radio.AllRadio or {}
-Radio.AllServer = Radio.AllServer or {}
+Radio.Chat = Radio.Chat or {}
 
 local FileSystem = "radio"
 local AddonName = "Radio"
@@ -55,7 +54,7 @@ if SERVER then
 			hook.Add("PlayerInitialSpawn", "Radio:PlayerInitialSpawnCheckVersionConfig", function(ply)
 				if ply:IsSuperAdmin() then
 					timer.Simple(10, function()
-						ply:RadioChatInfo(Radio.GetLanguage("A new version of the config file is available. Please download it."), 1)
+						ply:RadioChatInfo(Radio.GetLanguage("A new version of the config file is available. Please download it."), Radio.Chat.INFO)
 					end)
 				end
 			end)
@@ -65,7 +64,7 @@ if SERVER then
 			hook.Add("PlayerInitialSpawn", "Radio:PlayerInitialSpawnCheckVersionLanguage", function(ply)
 				if ply:IsSuperAdmin() then
 					timer.Simple(10, function()
-						ply:RadioChatInfo(Radio.GetLanguage("A new version of the language file is available. Please download it."), 1)
+						ply:RadioChatInfo(Radio.GetLanguage("A new version of the language file is available. Please download it."), Radio.Chat.INFO)
 					end)
 				end
 			end)
@@ -92,7 +91,7 @@ if SERVER then
 						hook.Add("PlayerInitialSpawn", "Radio:PlayerInitialSpawnCheckVersionAddon", function(ply)
 							if ply:IsSuperAdmin() then
 								timer.Simple(10, function()
-									ply:RadioChatInfo(Radio.GetLanguage("A new version of the addon is available. Please download it."), 1)
+									ply:RadioChatInfo(Radio.GetLanguage("A new version of the addon is available. Please download it."), Radio.Chat.INFO)
 								end)
 							end
 						end)

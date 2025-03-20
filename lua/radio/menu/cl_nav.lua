@@ -15,6 +15,9 @@ end
 
 function PANEL:MakeContent(ent, RadioBase)
     local Navigation = {}
+
+    local radio = ent:GetRadioComponent()
+	if ( !radio ) then return end
     
     self.Paint = function(self, w, h)
         draw.RoundedBox(10, 0, 0, w, h, Radio.Color["frame_background"])
@@ -45,7 +48,7 @@ function PANEL:MakeContent(ent, RadioBase)
     local InitialPanel = false
     for k, v in ipairs( Radio.Settings.Navigation ) do
 
-		if not v.Enabled or v.Visible and !v.Visible(LocalPlayer(), ent) then continue end
+		if not v.Enabled or v.Visible and !v.Visible(LocalPlayer(), radio) then continue end
 
 		local icon = Material( v.Icon )
 
@@ -83,7 +86,7 @@ function PANEL:MakeContent(ent, RadioBase)
             obj.active = true
             
             if v.DoFunc then
-                v.DoFunc(RadioBase:GetParent(), ent)
+                v.DoFunc(RadioBase:GetParent(), radio)
                 return
             end
 

@@ -18,10 +18,10 @@ function Radio.SecondsToClock(seconds)
 end
 
 function Radio.Error(ply, message)
-	ply:RadioChatInfo(message, 3) 
+	ply:RadioChatInfo(message, Radio.Chat.ERROR) 
 
 	if Radio.Settings.Debug then
-		ply:RadioChatInfo(Radio.GetLanguage("Check your console to have a debug trace"), 3) 
+		ply:RadioChatInfo(Radio.GetLanguage("Check your console to have a debug trace"), Radio.Chat.ERROR) 
 		ply:PrintMessage( 2, Radio.Trace() )
 	end
 end

@@ -21,215 +21,152 @@ end
 hook.Add("PlayerInitialSpawn", "Radio:PlayerInitialSpawnCheckGWSocket", function(ply)
 	if ply:IsSuperAdmin() and forceDegradeMode then
 		timer.Simple(10, function()
-			ply:RadioChatInfo(Radio.GetLanguage("The module GWSocket is not present on the server"), 3)
+			ply:RadioChatInfo(Radio.GetLanguage("The module GWSocket is not present on the server"), Radio.Chat.ERROR)
 		end)
 	end
 end)
 
-local function errorRadio(ply, ent, data)
-	if ent.socket then
-		ent.socket:close()
+local function infos_music(socket, data, successCallback, failedCallback, dataCallback, progressCallback)
+	if data.duration > Radio.Settings.MaxDuration then
+		if socket then
+			socket:close()
+		end
+
+		if ( isfunction(failedCallback) ) then
+			failedCallback({message = string.format(Radio.GetLanguage("The duration of the sound is too big. Max : %s"), Radio.SecondsToClock(Radio.Settings.MaxDuration))})
+		end
+
+		return
 	end
 
-	ent:SetNWString( "Radio:Info", Radio.GetLanguage("An error occured. Check the message in chat") )
-	Radio.Error(ply, data.message)
-
-	ent.isloading = false
-
-	if ( data.log ) then
-		Radio.Error(ply, Radio.GetLanguage("Logs") .. " : " .. data.log)
+	if ( isfunction(dataCallback) ) then
+		dataCallback(data)
 	end
 end
 
-local function connectWebsite(ply, ent, url)
-	ent:SetNWString( "Radio:Info", Radio.GetLanguage("Conversion on the backend (this can take some time)"))
+local function download_started(socket, data, successCallback, failedCallback, dataCallback, progressCallback)
+	if ( !isfunction(progressCallback) ) then return end
+
+	progressCallback(Radio.GetLanguage("Starting download"))
+end
+
+local function download_progress(socket, data, successCallback, failedCallback, dataCallback, progressCallback)
+	if ( !isfunction(progressCallback) ) then return end
+	if ( !data.percent ) then return end
+
+	progressCallback(string.format(Radio.GetLanguage("Download progress"), data.percent))
+end
+
+local function download_finished(socket, data, successCallback, failedCallback, dataCallback, progressCallback)
+	if ( !isfunction(progressCallback) ) then return end
+
+	progressCallback(Radio.GetLanguage("Finished download"))
+end
+
+local function conversion_started(socket, data, successCallback, failedCallback, dataCallback, progressCallback)
+	if ( !isfunction(progressCallback) ) then return end
+
+	progressCallback(Radio.GetLanguage("Starting conversion"))
+end
+
+local function conversion_progress(socket, data, successCallback, failedCallback, dataCallback, progressCallback)
+	if ( !isfunction(progressCallback) ) then return end
+	if ( !data.percent ) then return end
+
+	progressCallback(string.format(Radio.GetLanguage("Conversion progress"), data.percent))
+end
+
+local function conversion_finished(socket, data, successCallback, failedCallback, dataCallback, progressCallback)
+	if ( !isfunction(progressCallback) ) then return end
+
+	progressCallback(Radio.GetLanguage("Finished conversion"))
+end
+
+local function finished(socket, data, successCallback, failedCallback, dataCallback, progressCallback)
+	if socket then
+		socket:close()
+	end
+
+	if ( isfunction(successCallback) ) then
+		successCallback(data.url)
+	end
+end
+
+local function error(socket, data, successCallback, failedCallback, dataCallback, progressCallback)
+	if socket then
+		socket:close()
+	end
+
+	if ( isfunction(failedCallback) ) then
+		failedCallback(data)
+	end
+end
+
+local function conversion_finished(socket, data, successCallback, failedCallback, dataCallback, progressCallback)
+	if ( !isfunction(progressCallback) ) then return end
+
+	progressCallback(Radio.GetLanguage("Finished conversion"))
+end
+
+local function connectWebsite(url, ply, successCallback, failedCallback, dataCallback, progressCallback)
+	if ( isfunction(progressCallback) ) then
+		progressCallback(Radio.GetLanguage("Conversion on the backend (this can take some time)"));
+	end
 	
 	http.Fetch(baseUri .. "/get/mp3/degrade", 
 		function(body)
 			for _, data in pairs(util.JSONToTable(body)) do
 				if ensFunctionsDegrade[data.type] then
-					ensFunctionsDegrade[data.type](ply, ent, data)
+					ensFunctionsDegrade[data.type](nil, data, successCallback, failedCallback, dataCallback, progressCallback)
 				end
 			end
 		end,
 		function(errorMessage)
-			errorRadio(ply, ent, {message = string.format(Radio.GetLanguage("Can't connect to the backend or the conversion take too long. (%s)"), errorMessage) })
+			if ( isfunction(failedCallback) ) then
+				failedCallback({message = string.format(Radio.GetLanguage("Can't connect to the backend or the conversion take too long. (%s)"), errorMessage)});
+			end
 		end,
-
 		{url = url}
 	)
 end
 
-local function upload(ply, ent, youtubeURL, fileData, callback)
-	ent:SetNWString( "Radio:Info", Radio.GetLanguage("Starting the upload of the video to the backend."))
-
-	HTTP({
-		method = "POST",
-		url = baseUri .. "/upload?url=" .. youtubeURL,
-		body = fileData,
-		success = function(code, body)
-			if ( code != 200 ) then
-				errorRadio(ply, ent, {message = string.format(Radio.GetLanguage("An error occured while uploading the file. (%s)"), code) })
-				return 
-			end
-	
-			if ( callback ) then
-				callback(ply, ent, youtubeURL)
-			end
-		end,
-		failed = function(message) 
-			errorRadio(ply, ent, {message = string.format(Radio.GetLanguage("An error occured while uploading the file. (%s)"), message) })
-		end
-	})
-end
-
-local function download(ply, ent, googleURL, youtubeURL)
-	ent:SetNWString( "Radio:Info", Radio.GetLanguage("Downloading the video on the server.") )
-	
-	http.Fetch(googleURL,
-		-- onSuccess function
-		function( body, length, headers, code )
-			if ( code == 403 ) then
-				errorRadio(ply, ent, {message = Radio.GetLanguage("The server IP seems to be banned from the google video services. Please contact the server owner.") })
-				return
-			end
-
-			if ( code != 200 ) then
-				errorRadio(ply, ent, {message = string.format(Radio.GetLanguage("An error occured while downloading the file. (%s)"), code) })
-				return 
-			end
-
-			local fileData = body
-
-			if ( Radio.Settings.DegradeMode ) then
-				upload(ply, ent, youtubeURL, fileData, connectWebsite)
-			else
-				upload(ply, ent, youtubeURL, fileData, function(ply, ent, youtubeURL)
-					ent.socket:write("upload_finished")
-				end)
-			end
-		end,
-
-		-- onFailure function
-		function( message )
-			errorRadio(ply, ent, {message = string.format(Radio.GetLanguage("An error occured while downloading the file. (%s)"), message) })
-		end
-	)
-end
-
-
-local function infos_music(ply, ent, data)
-	if data.duration > Radio.Settings.MaxDuration then
-		if ent.socket then
-			ent.socket:close()
-		end
-
-		Radio.Error(ply, string.format(Radio.GetLanguage("The duration of the sound is too big. Max : %s"), Radio.SecondsToClock(Radio.Settings.MaxDuration) ) )
-
-		return
+local function connectWebsocket(url, ply, successCallback, failedCallback, dataCallback, progressCallback)
+	if ( isfunction(progressCallback) ) then
+		progressCallback(Radio.GetLanguage("Connection to the backend"));
 	end
 
-    ent:SetNWString( "Radio:Title", data.title)
-	ent:SetNWString( "Radio:Author", data.artist)
-	ent:SetNWString( "Radio:Thumbnail", data.thumbnail)
+	local socket = GWSockets.createWebSocket( baseUriWS .."/get/mp3" )
 
-	ent.live = data.live
-	ent.duration = data.duration -- we need to sent the duration after the Radio:URL
-end
-
-local function download_url(ply, ent, data)
-	download(ply, ent, data.googleURL, data.youtubeURL)
-end
-
-local function download_started(ply, ent, data)
-	ent:SetNWString( "Radio:Info", Radio.GetLanguage("Starting download") )
-end
-
-local function download_progress(ply, ent, data)
-	if ( data.percent ) then
-		ent:SetNWString( "Radio:Info", string.format(Radio.GetLanguage("Download progress"), data.percent) )
-	end
-end
-
-local function download_finished(ply, ent, data)
-	ent:SetNWString( "Radio:Info", Radio.GetLanguage("Finished download") )
-end
-
-local function conversion_started(ply, ent, data)
-	ent:SetNWString( "Radio:Info", Radio.GetLanguage("Starting conversion") )
-end
-
-local function conversion_progress(ply, ent, data)
-	if ( data.percent ) then
-		ent:SetNWString( "Radio:Info", string.format(Radio.GetLanguage("Conversion progress"), data.percent) )
-	end
-end
-
-local function conversion_finished(ply, ent, data)
-	ent:SetNWString( "Radio:Info", Radio.GetLanguage("Finished conversion") )
-end
-
-local function finished(ply, ent, data)
-	if ent.socket then
-		ent.socket:close()
-	end
-
-	ent:SetNWString( "Radio:URL", data.url)
-	ent:SetNWInt   ( "Radio:Duration", ent.duration)
-	ent:SetNWString( "Radio:Mode", "1")
-	ent:SetNWInt   ( "Radio:Time", CurTime())
-
-	ent:SetNWString( "Radio:Info", "")
-	ent.isloading = false
-
-	if ent.live then
-		ent:SetNWString( "Radio:Mode", "3")
-	end
-end
-
-
-
-local function connectWebsocket(ply, ent, url)
-	ent:SetNWString( "Radio:Info", Radio.GetLanguage("Connection to the backend"))
-
-	ent.socket = GWSockets.createWebSocket( baseUriWS .."/get/mp3" )
-
-	function ent.socket:onMessage(txt)
+	function socket:onMessage(txt)
 		local data = util.JSONToTable(txt)
 
 		if ensFunctions[data.type] then
-			ensFunctions[data.type](ply, ent, data)
+			ensFunctions[data.type](socket, data, successCallback, failedCallback, dataCallback, progressCallback)
 		end
 	end
 	
-	function ent.socket:onError(txt)
-		errorRadio(ply, ent, {message = txt})
+	function socket:onError(txt)
+		if ( socket ) then
+			socket:Close()
+		end
+
+		if ( isfunction(failedCallback) ) then
+			failedCallback({message = txt});
+		end
 	end
 	
-	function ent.socket:onConnected()
-		ent.socket:write(url)
-	end
-	
-	function ent.socket:onDisconnected()
-		ent:SetNWString( "Radio:Info", "")
-		ent.isloading = false
+	function socket:onConnected()
+		socket:write(url)
 	end
 
-	ent.socket:open()
+	socket:open()
 end
 
-function Radio.SetMusic(ply, ent, url)
-	if ent.isloading then return end
-
-	ent.isloading = true
-
-	ent:SetNWString( "Radio:URL", "")
-    ent:SetNWString( "Radio:Mode", "0")
-
+function Radio.GetFinalURL(url, ply, successCallback, failedCallback, dataCallback, progressCallback)
 	if ( Radio.Settings.DegradeMode ) then
-		connectWebsite(ply, ent, url)
+		connectWebsite(url, ply, successCallback, failedCallback, dataCallback, progressCallback)
 	else
-		connectWebsocket(ply, ent, url)
+		connectWebsocket(url, ply, successCallback, failedCallback, dataCallback, progressCallback)
 	end
 end
 
@@ -244,12 +181,12 @@ ensFunctions = {
 	["conversion_progress"] = conversion_progress,
 	["conversion_finished"] = conversion_finished,
 	["finished"] = finished,
-	["error"] = errorRadio,
+	["error"] = error,
 }
 
 ensFunctionsDegrade = {
 	["infos_music"] = infos_music,
 	["download_url"] = download_url,
 	["finished"] = finished,
-	["error"] = errorRadio,
+	["error"] = error,
 }

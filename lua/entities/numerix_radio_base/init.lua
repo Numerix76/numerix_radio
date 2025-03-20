@@ -10,9 +10,15 @@ AddCSLuaFile( "shared.lua" )
 include("shared.lua")
 
 function ENT:Initialize()
-	self.health = self.health or 100
+	local radio = ents.Create("numerix_radio_component")
+	radio:SetParent(self)
+	radio:SetMaxDistanceSound( self:GetDefaultDistanceSound() )
+	radio:SetServer(self.IsServer)
+	radio:Spawn()
+	
+	self:SetHealth(self.StartHealth)
 	self:SetModel(self.Model or "models/sligwolf/grocel/radio/ghettoblaster.mdl")
-	self:PhysicsInit( SOLID_VPHYSICS )      
+	self:PhysicsInit( SOLID_VPHYSICS )
 	self:SetMoveType( MOVETYPE_VPHYSICS )  
 	self:SetSolid( SOLID_VPHYSICS )
 	self:SetUseType( SIMPLE_USE )
@@ -27,15 +33,18 @@ function ENT:Initialize()
 	end
 end
 
+function ENT:GetDefaultDistanceSound()
+	return Radio.Settings.DistanceSoundRadio^2
+end
+
 function ENT:OnTakeDamage( dmgInfo )	
 	self.Entity:TakePhysicsDamage(dmgInfo)
+	self:SetHealth(self:Health() - dmgInfo:GetDamage())
 
-	self.health = self.health - dmgInfo:GetDamage()
-
-	if self.health <= 0 then self:explode() end
+	if self:Health() <= 0 then self:Explode() end
 end
 	
-function ENT:explode()
+function ENT:Explode()
 	if !Radio.Settings.ExplodeDamage then return end
 
 	local effectdata = EffectData()
@@ -45,23 +54,18 @@ function ENT:explode()
 	self:Remove()
 end
 
-function ENT:AcceptInput( Name, Activator, Caller )	
-	if Name == "Use" and Caller:IsPlayer() and self:CanModificateRadio(Activator) then
-
-		if self.IsAdmin and !Caller:IsAdmin() then
-			Caller:RadioChatInfo( Radio.GetLanguage("You are not an admin, you can't use that radio.") )
+function ENT:AcceptInput(Name, Activator, Caller)	
+	if Name == "Use" and Activator:IsPlayer() and Radio.CanEdit(Activator, self) then
+		if self.Admin and !Activator:IsAdmin() then
+			Activator:RadioChatInfo( Radio.GetLanguage("You are not an admin, you can't use that radio."), Radio.Chat.ERROR )
 
 			return
 		end
 
-		net.Start( "Radio:OpenStreamMenu" )
-		net.WriteEntity( self )
-		net.Send( Activator )
+		net.Start("Radio:OpenStreamMenu")
+		net.WriteEntity(self)
+		net.Send(Activator)
 	end	
-end
-
-function ENT:OnRemove()
-	self:DeleteRadio()
 end
 
 function ENT:UpdateTransmitState()

@@ -3,13 +3,6 @@
 Radio made by Numerix (https://steamcommunity.com/id/numerix/)
 
 --------------------------------------------------------------------------------------------------]]
-
-hook.Add("OnEntityCreated", "Radio:UpdateData", function(ent)
-	if ent.SWEPRadio or ( ent:IsCarRadio() and ( ent:GetNWBool("Radio:HasRadio") or Radio.Settings.VehicleSpawnRadio ) ) then
-		Radio.AllRadio[ent] = true
-	end
-end)
-
 local alreadystart
 hook.Add( "PlayerButtonDown", "Radio:KeyPressVehicle", function(ply, button)
 	if input.IsKeyDown(GetConVar("radio_open_menu"):GetInt()) and !alreadystart then
@@ -23,12 +16,10 @@ hook.Add( "PlayerButtonDown", "Radio:KeyPressVehicle", function(ply, button)
 			local plyvehicle = ply:GetVehicle()
 			local vehicle = IsValid(plyvehicle:GetParent()) and plyvehicle:GetParent() or plyvehicle
 
-			if vehicle:GetNWBool("Radio:HasRadio") then
-				net.Start("Radio:OpenMenuInVehicle")
-				net.WriteEntity(vehicle)
-				net.SendToServer()
-			else   
-				ply:RadioChatInfo(Radio.GetLanguage("Please install a radio in the vehicle."), 1)                  
+			if Radio.IsCarHaveRadio(vehicle) then
+				Radio.OpenStreamMenu(vehicle)
+			else
+				ply:RadioChatInfo(Radio.GetLanguage("Please install a radio in the vehicle."), Radio.Chat.INFO)                  
 			end
 		end
 	end
@@ -42,7 +33,7 @@ hook.Add( "PlayerButtonDown", "Radio:KeyPressVehicle", function(ply, button)
 
 		if IsValid( ply ) and !ply:InVehicle() then
             local tr = util.TraceLine(util.GetPlayerTrace( ply ))
-            if IsValid(tr.Entity) and tr.Entity:IsCarRadio() then 
+            if IsValid(tr.Entity) and Radio.IsCar(tr.Entity) then 
 				net.Start("Radio:RetrieveFromVehicle")
 				net.WriteEntity(tr.Entity)
                 net.SendToServer()
@@ -51,12 +42,12 @@ hook.Add( "PlayerButtonDown", "Radio:KeyPressVehicle", function(ply, button)
     end
 end)
 
-local radio_open_menu = CreateClientConVar( "radio_open_menu", 23 )
-local radio_retrieve = CreateClientConVar( "radio_retrieve", 18 )
+local radio_open_menu = CreateClientConVar( "radio_open_menu", KEY_M )
+local radio_retrieve = CreateClientConVar( "radio_retrieve", KEY_K )
 
 hook.Add( "AddToolMenuCategories", "Radio:MakeCategoryOption", function()
 	spawnmenu.AddToolCategory( "Options", "Radio", "Radio" )
-end )
+end)
 
 hook.Add( "PopulateToolMenu", "Radio:MakeOptions", function()
 	spawnmenu.AddToolMenuOption( "Options", "Radio", "Radio_Numerix_Config", "Config", "", "", function( panel )

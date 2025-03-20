@@ -17,3 +17,7 @@ ENT.Spawnable       = true
 
 ENT.Model           = "models/props_lab/servers.mdl"
 ENT.IsServer        = true
+
+function ENT:GetDefaultDistanceSound()
+	return Radio.Settings.DistanceSoundServer^2
+end
