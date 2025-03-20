@@ -35,7 +35,7 @@ Radio.Settings.Seek = true
 Radio.Settings.MaxDuration = 15*60
 
 --Do you want to enable the radio entity ?
-Radio.Settings.EnableEntity = false
+Radio.Settings.EnableEntity = true
 
 --Do you want to enable the radio swep ?
 Radio.Settings.EnableSWEP = true
