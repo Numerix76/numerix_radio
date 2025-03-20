@@ -39,7 +39,7 @@ function ENT:Play(url, ply)
 
 			self:SetURL(url)
 			self:SetLive(musicInfo.live or false)
-			self:SetStartTime(SysTime())
+			self:SetStartTime(CurTime())
 			self:SetInformation("")
 			self:SetMusicDuration(musicInfo.duration)
 			self:SetMusicTitle(musicInfo.title)
@@ -264,7 +264,7 @@ function ENT:SetCurrentTime(time)
 
 	time = math.Clamp(time, 0, self:GetMusicDuration() or 0)
 
-	self:SetStartTime(SysTime() - time)
+	self:SetStartTime(CurTime() - time)
 end
 
 function ENT:SetVoiceEnabled(voice)
@@ -284,7 +284,7 @@ function ENT:SetServerName(name)
 end
 
 function ENT:GetCurrentTime()
-	return SysTime() - self:GetStartTime()
+	return CurTime() - self:GetStartTime()
 end
 
 function ENT:SetServer(server)

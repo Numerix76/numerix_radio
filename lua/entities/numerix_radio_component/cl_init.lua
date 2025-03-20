@@ -14,7 +14,7 @@ function ENT:GetCurrentTime(serverTime)
 	if ( !serverTime and self.station ) then
 		return self.station:GetTime()
 	else
-		return SysTime() - self:GetStartTime()
+		return CurTime() - self:GetStartTime()
 	end
 end
 
@@ -42,6 +42,8 @@ function ENT:Think()
 	if url == "" and (self.playing or self.stationError) then 
 		self:Stop()
 	end
+
+	--print(self.station, self.station:GetVolume())
 	
 	if url != "" and !self.playing and !self.startedPlaying then 
 		self.startedPlaying = true --To not lunch multiple times the music

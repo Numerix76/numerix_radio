@@ -69,7 +69,7 @@ function ENT:GetVolume()
 end
 
 function ENT:GetStartTime()
-	return self:GetController():GetNWFloat( "Radio:Time", SysTime() )
+	return self:GetController():GetNWFloat( "Radio:Time", CurTime() )
 end
 
 function ENT:IsRainbow()
