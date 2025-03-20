@@ -269,9 +269,9 @@ function Radio.RetrieveFromVehicle(len, ply)
 		return
 	end
 
-	if !Radio.CanEdit(ply, ent) then
+	if !Radio.IsCarOwner(ply, ent) then
 		ply:RadioChatInfo(Radio.GetLanguage("You are not the owner the car."), Radio.Chat.INFO)
-		return 
+		return
 	end
 
 	local radio = ent:GetRadioComponent()

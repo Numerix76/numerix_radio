@@ -122,7 +122,10 @@ function SWEP:SecondaryAttack()
 
 	if SERVER then
 		if ( Radio.Settings.EnableVehicle and Radio.IsCar(trace.Entity) ) then 
-			if !Radio.CanEdit(self.Owner, trace.Entity) then return end 
+			if !Radio.IsCarOwner(self.Owner, trace.Entity) then
+				self.Owner:RadioChatInfo(Radio.GetLanguage("You are not the owner the car."), Radio.Chat.INFO)
+				return 
+			end 
 
 			if ( Radio.IsCarHaveRadio(trace.Entity) ) then
 				self.Owner:RadioChatInfo(Radio.GetLanguage("The vehicle already have a radio."), Radio.Chat.INFO)

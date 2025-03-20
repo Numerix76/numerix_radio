@@ -86,18 +86,30 @@ function Radio.CanEdit(ply, ent)
 
 	if ply:GetPos():DistToSqr(ent:GetPos()) > maxDistance then return false end
 
-	if isCar then
-		--Check he own the car or he can use it
-		if DarkRP and !ply:canKeysLock(ent) and !scripted_ents.IsBasedOn(ent:GetClass(), "wac_hc_base") then return false end
-		if FPP and !ent:CPPICanUse(ply) then return false end
+	if ( radio:IsPrivate() or radio:IsPrivateBuddy() ) then
+		if isCar then
+			if !Radio.IsCarOwner(ply, ent) then return false end
+		end
+	
+		if radio then
+			--Check property with FPP
+			local owner = ent.FPPOwner or ent.Owner
+			if FPP and radio:IsPrivate() and ( (radio:IsPrivateBuddy() and !ent:CPPICanUse(ply)) or (!radio:IsPrivateBuddy() and owner != ply) ) then return false end
+		end
 	end
 
-	if radio then
-		--Check property with FPP
-		local owner = ent.FPPOwner or ent.Owner
-		if FPP and radio:IsPrivate() and ( (radio:IsPrivateBuddy() and !ent:CPPICanUse(ply)) or (!radio:IsPrivateBuddy() and owner != ply) ) then return false end
-	end	
+	return true
+end
 
+function Radio.IsCarOwner(ply, ent)
+	if !IsValid(ply) then return false end
+	if !IsValid(ent) then return false end
+
+	if !Radio.IsCar(ent) then return false end
+
+	if DarkRP and ent:getDoorOwner() != nil and !ply:canKeysLock(ent) and !scripted_ents.IsBasedOn(ent:GetClass(), "wac_hc_base") then return false end
+	if FPP and !ent:CPPICanUse(ply) then return false end
+	
 	return true
 end
 
