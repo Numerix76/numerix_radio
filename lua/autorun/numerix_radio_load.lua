@@ -10,12 +10,11 @@ Radio.Settings = Radio.Settings or {}
 Radio.Language = Radio.Language or {}
 
 Radio.Color = Radio.Color or {}
-
 Radio.Chat = Radio.Chat or {}
 
 local FileSystem = "radio"
 local AddonName = "Radio"
-local Version = "2.2.3"
+local Version = "3.0.0"
 local FromWorkshop = false
 
 MsgC( Color( 225, 20, 30 ), "\n-------------------------------------------------------------------\n")

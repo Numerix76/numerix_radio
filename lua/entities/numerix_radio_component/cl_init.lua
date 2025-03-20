@@ -42,8 +42,6 @@ function ENT:Think()
 	if url == "" and (self.playing or self.stationError) then 
 		self:Stop()
 	end
-
-	--print(self.station, self.station:GetVolume())
 	
 	if url != "" and !self.playing and !self.startedPlaying then 
 		self.startedPlaying = true --To not lunch multiple times the music
