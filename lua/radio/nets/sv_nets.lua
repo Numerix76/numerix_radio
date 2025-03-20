@@ -264,7 +264,7 @@ function Radio.RetrieveFromVehicle(len, ply)
 	if !Radio.Settings.EnableSWEP and !Radio.Settings.EnableEntity then return end
 	if !Radio.Settings.VehicleSpawnRadioRetrieve and ent.SpawnedWithRadio then return end
 
-	if ( !Radio.IsCarHaveRadio(ent) ) then
+	if ( !Radio.IsCarWithRadio(ent) ) then
 		ply:RadioChatInfo(Radio.GetLanguage("There is no radio in the car."), Radio.Chat.INFO)
 		return
 	end

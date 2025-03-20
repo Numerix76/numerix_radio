@@ -16,7 +16,7 @@ hook.Add( "PlayerButtonDown", "Radio:KeyPressVehicle", function(ply, button)
 			local plyvehicle = ply:GetVehicle()
 			local vehicle = IsValid(plyvehicle:GetParent()) and plyvehicle:GetParent() or plyvehicle
 
-			if Radio.IsCarHaveRadio(vehicle) then
+			if Radio.IsCarWithRadio(vehicle) then
 				Radio.OpenStreamMenu(vehicle)
 			else
 				ply:RadioChatInfo(Radio.GetLanguage("Please install a radio in the vehicle."), Radio.Chat.INFO)                  

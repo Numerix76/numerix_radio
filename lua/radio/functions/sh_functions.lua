@@ -113,7 +113,7 @@ function Radio.IsCarOwner(ply, ent)
 	return true
 end
 
-function Radio.IsCarHaveRadio(ent)
+function Radio.IsCarWithRadio(ent)
 	if ( !Radio.IsCar(ent) ) then return false end
 	if ( !ent:GetRadioComponent() ) then return false end
 
