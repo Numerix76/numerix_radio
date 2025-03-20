@@ -34,7 +34,7 @@ function PANEL:MakeContent(ent, type)
 	
 	self.Paint = function(s, w, h) 
 		if radio:GetInformation() != "" then
-			draw.DrawText(ent:GetNWString("Radio:Info"), "Radio.Menu", w/2, h/2 - 10, Radio.Color["text"], TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+			draw.DrawText(radio:GetInformation(), "Radio.Menu", w/2, h/2 - 10, Radio.Color["text"], TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 			return
 		end
 
