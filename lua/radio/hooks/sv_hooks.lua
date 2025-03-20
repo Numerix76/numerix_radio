@@ -25,7 +25,7 @@ hook.Add( "PlayerCanHearPlayersVoice", "Radio:CanPlayerHearRadioVoice", function
 		if ( !radio:IsConnectedToServer() ) then continue end
 
 		local controller = radio:GetController()
-		if ( radio:CanHear(listener) and talker:GetPos():DistToSqr( controller:GetPos() ) < 50000 and controller:IsVoiceEnabled() ) then
+		if ( radio:CanHear(listener) and talker:GetPos():DistToSqr( controller:GetParent():GetPos() ) < 200^2 and controller:IsVoiceEnabled() ) then
 			return true, false
 		end
 	end

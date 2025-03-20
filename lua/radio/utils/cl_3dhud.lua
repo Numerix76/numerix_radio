@@ -161,7 +161,7 @@ function Radio.Draw3DInfo(ent, InfoTable)
 			surface.SetDrawColor( Radio.Color["voice_background"] );
 			surface.DrawRect(InfoTable.InfoVoiceBackX, InfoTable.InfoVoiceBackY, InfoTable.InfoVoiceBackW, InfoTable.InfoVoiceBackH)
 			if( radio:IsVoiceEnabled() ) then
-				if( LocalPlayer().RadioVoice and ( LocalPlayer():GetPos():DistToSqr( ent:GetPos() ) < 50000 ) ) then
+				if( LocalPlayer().RadioVoice and ( LocalPlayer():GetPos():DistToSqr( ent:GetPos() ) < 200^2 ) ) then
 					surface.SetTextColor( Radio.Color["voice_active"] );
 				else
 					surface.SetTextColor( Radio.Color["voice_enable"] );
