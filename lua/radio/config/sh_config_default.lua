@@ -4,7 +4,7 @@ Radio made by Numerix (https://steamcommunity.com/id/numerix/)
 
 --------------------------------------------------------------------------------------------------]]
 
-Radio.Settings.VersionDefault = "2.0.4" --DON'T TOUCH THIS
+Radio.Settings.VersionDefault = "3.0.0" --DON'T TOUCH THIS
 
 --If debug true then if there is a problem you will have the line related in the console
 Radio.Settings.Debug = false
@@ -53,7 +53,7 @@ Radio.Settings.Salary = 10
 Radio.Settings.VehicleSpawnRadio = false
 
 --Can radio in vehicle can be retrieve from it when they have spawned with it ?
-Radio.Settings.VehicleSpawnRadioRetrieve = true
+Radio.Settings.VehicleSpawnRadioRetrieve = false
 
 -- The music of a vehicle is only listenable if the player is inside the vehicle ?
 Radio.Settings.VehicleSoundOnly = true

@@ -4,7 +4,7 @@ Radio made by Numerix (https://steamcommunity.com/id/numerix/)
 
 --------------------------------------------------------------------------------------------------]]
 
-Radio.Language.VersionDefault = "2.0.4" --DON'T TOUCH THIS
+Radio.Language.VersionDefault = "3.0.0" --DON'T TOUCH THIS
 
 Radio.Language["default"] = {
 	["The file does not exist."] = "The file does not exist.",
