@@ -135,6 +135,8 @@ if CLIENT then
 		if folder == "config" then continue end
 
 		for k, file in pairs (file.Find(FileSystem.."/"..folder.."/*", "LUA")) do
+			if !string.StartWith(file, "cl_") and !string.StartWith(file, "sh_") then continue end
+			
 			include(FileSystem.."/"..folder.."/"..file)
 	
 			MsgC( Color( 225, 20, 30 ), "["..AddonName.."]", Color(255,255,255), " Loading : "..FileSystem.."/"..folder.."/"..file.."\n")
