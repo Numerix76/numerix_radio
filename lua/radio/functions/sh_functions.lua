@@ -94,7 +94,17 @@ function Radio.CanEdit(ply, ent)
 		if radio then
 			--Check property with FPP
 			local owner = ent.FPPOwner or ent.Owner
-			if FPP and radio:IsPrivate() and ( (radio:IsPrivateBuddy() and !ent:CPPICanUse(ply)) or (!radio:IsPrivateBuddy() and owner != ply) ) then return false end
+
+			if FPP then
+				local canUse
+				if CLIENT then
+					canUse = FPP.canTouchEnt(ent, "PlayerUse")
+				else
+					canUse = ent:CPPICanUse(ply)
+				end
+
+				if FPP and radio:IsPrivate() and ( (radio:IsPrivateBuddy() and !canUse) or (!radio:IsPrivateBuddy() and owner != ply) ) then return false end
+			end
 		end
 	end
 
@@ -108,7 +118,13 @@ function Radio.IsCarOwner(ply, ent)
 	if !Radio.IsCar(ent) then return false end
 
 	if DarkRP and ent:getDoorOwner() != nil and !ply:canKeysLock(ent) and !scripted_ents.IsBasedOn(ent:GetClass(), "wac_hc_base") then return false end
-	if FPP and !ent:CPPICanUse(ply) then return false end
+	if FPP then
+		if CLIENT then
+			return FPP.canTouchEnt(ent, "PlayerUse")
+		else
+			return ent:CPPICanUse(ply)
+		end
+	end
 	
 	return true
 end
