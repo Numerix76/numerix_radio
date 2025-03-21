@@ -133,7 +133,7 @@ local function connectWebsocket(url, ply, successCallback, failedCallback, dataC
 		progressCallback(Radio.GetLanguage("Connection to the backend"));
 	end
 
-	local socket = GWSockets.createWebSocket( "ws://" .. Radio.Settings.BackEnd ..  .."/get/mp3" )
+	local socket = GWSockets.createWebSocket( "ws://" .. Radio.Settings.BackEnd .. "/get/mp3" )
 
 	function socket:onMessage(txt)
 		local data = util.JSONToTable(txt)
