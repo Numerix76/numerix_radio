@@ -79,5 +79,6 @@ Radio.Language["en"] = {
 	["Starting the upload of the video to the backend."] = "Starting the upload of the video to the backend.",
 
 	["The vehicle already have a radio."] = "The vehicle already have a radio.",
-	["You already have a radio on you."] = "You already have a radio on you."
+	["You already have a radio on you."] = "You already have a radio on you.",
+	["You can't access to the radio because it is private."] = "You can't access to the radio because it is private."
 }

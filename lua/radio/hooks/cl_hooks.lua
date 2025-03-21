@@ -17,7 +17,12 @@ hook.Add( "PlayerButtonDown", "Radio:KeyPressVehicle", function(ply, button)
 			local vehicle = IsValid(plyvehicle:GetParent()) and plyvehicle:GetParent() or plyvehicle
 
 			if Radio.IsCarWithRadio(vehicle) then
-				Radio.OpenStreamMenu(vehicle)
+				if ( !Radio.CanEdit(ply, vehicle) ) then 
+					ply:RadioChatInfo(Radio.GetLanguage("You can't access to the radio because it is private."), Radio.Chat.INFO)
+				else
+					Radio.OpenStreamMenu(vehicle)
+				end
+				
 			else
 				ply:RadioChatInfo(Radio.GetLanguage("Please install a radio in the vehicle."), Radio.Chat.INFO)
 			end

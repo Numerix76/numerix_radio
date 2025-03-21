@@ -25,7 +25,7 @@ function Radio.OpenStreamMenu(ent)
 		end
 	end
 
-    local RadioBase = vgui.Create( "DPanel", RadioMenu )
+	local RadioBase = vgui.Create( "DPanel", RadioMenu )
 	RadioBase:SetSize(ScrW()/1.5, ScrH()/1.5)
 	RadioBase:CenterHorizontal(0.6)
 	RadioBase:CenterVertical(0.5)
@@ -44,7 +44,7 @@ function Radio.OpenStreamMenu(ent)
 	Close:SetSize( 25, 25 )
 	Close.Paint = function( self, w, h ) end
 	Close.DoClick = function()
-        RadioMenu:Close()
+		RadioMenu:Close()
 	end
 
 	local RadioNav = vgui.Create("Radio_Nav", RadioMenu)

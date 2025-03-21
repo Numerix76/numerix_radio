@@ -55,9 +55,15 @@ function ENT:Explode()
 end
 
 function ENT:AcceptInput(Name, Activator, Caller)	
-	if Name == "Use" and Activator:IsPlayer() and Radio.CanEdit(Activator, self) then
+	if Name == "Use" and Activator:IsPlayer() then
 		if self.Admin and !Activator:IsAdmin() then
 			Activator:RadioChatInfo( Radio.GetLanguage("You are not an admin, you can't use that radio."), Radio.Chat.ERROR )
+
+			return
+		end
+
+		if ( !Radio.CanEdit(Activator, self) ) then
+			Activator:RadioChatInfo(Radio.GetLanguage("You can't access to the radio because it is private."), Radio.Chat.INFO)
 
 			return
 		end
