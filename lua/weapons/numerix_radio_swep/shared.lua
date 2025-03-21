@@ -186,7 +186,7 @@ local InfoTableView = {
 
 	InfoPosXText = -20,
 	InfoPosYText = -25,
-	InfoPosYTextError = 0,
+	InfoPosYTextError = 15,
 
 	InfoMaxWText = 270,
 
