@@ -22,7 +22,7 @@ function ENT:Initialize()
 	self:SetMoveType( MOVETYPE_VPHYSICS )  
 	self:SetSolid( SOLID_VPHYSICS )
 	self:SetUseType( SIMPLE_USE )
- 
+
 	local phys = self:GetPhysicsObject()
 	if phys:IsValid() then
 		phys:Wake()
@@ -65,7 +65,7 @@ function ENT:AcceptInput(Name, Activator, Caller)
 		net.Start("Radio:OpenStreamMenu")
 		net.WriteEntity(self)
 		net.Send(Activator)
-	end	
+	end
 end
 
 function ENT:UpdateTransmitState()

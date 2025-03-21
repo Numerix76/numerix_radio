@@ -25,7 +25,7 @@ function PANEL:Init()
 end
 
 function PANEL:PerformLayout(width, height)
-    self:SetSize(width, height)
+	self:SetSize(width, height)
 end
 
 function PANEL:MakeContent(ent, type)
@@ -75,36 +75,36 @@ function PANEL:MakeContent(ent, type)
 	end
 
 	local lastPauseState = radio:IsPaused()
-    local PlayPauseButton = vgui.Create( "DImageButton", self )
-    PlayPauseButton:SetSize( self:GetTall()/2, self:GetTall()/2 )			
-    PlayPauseButton:SetPos( self:GetWide()/10, 0 )	
+	local PlayPauseButton = vgui.Create( "DImageButton", self )
+	PlayPauseButton:SetSize( self:GetTall()/2, self:GetTall()/2 )			
+	PlayPauseButton:SetPos( self:GetWide()/10, 0 )	
 	PlayPauseButton:SetText( "" )			
-    PlayPauseButton:SetImage(lastPauseState and "numerix_radio/play.png" or "numerix_radio/pause.png")
+	PlayPauseButton:SetImage(lastPauseState and "numerix_radio/play.png" or "numerix_radio/pause.png")
 	PlayPauseButton:SetTooltip(lastPauseState and Radio.GetLanguage("Pause") or Radio.GetLanguage("UnPause"))
-    PlayPauseButton:CenterVertical(0.5)
-    PlayPauseButton.Think = function( self )
+	PlayPauseButton:CenterVertical(0.5)
+	PlayPauseButton.Think = function( self )
 		if radio:IsConnectedToServer() or radio:GetURL() == "" then
 			self:SetAlpha(0)
 		else
 			self:SetAlpha(255)
-        end
+		end
 
 		if radio:IsPaused() then
-            if !lastPauseState then
-                self:SetToolTip( Radio.GetLanguage("Pause") )
+			if !lastPauseState then
+				self:SetToolTip( Radio.GetLanguage("Pause") )
 
-                self:SetImage("numerix_radio/play.png")
-                lastPauseState = true
-            end
-        else
-            if lastPauseState then
-                self:SetToolTip(Radio.GetLanguage("UnPause") )
-            
-                self:SetImage("numerix_radio/pause.png")
+				self:SetImage("numerix_radio/play.png")
+				lastPauseState = true
+			end
+		else
+			if lastPauseState then
+				self:SetToolTip(Radio.GetLanguage("UnPause") )
+			
+				self:SetImage("numerix_radio/pause.png")
 
-                lastPauseState = false
-            end
-        end
+				lastPauseState = false
+			end
+		end
 	end
 	PlayPauseButton.Paint = function( self, w, h )            
 		if self:IsHovered() or self:IsDown() then
@@ -118,15 +118,15 @@ function PANEL:MakeContent(ent, type)
 			net.WriteBool(!radio:IsPaused())
 			net.SendToServer()
 		end
-    end
-    
-    local StopMusic = vgui.Create( "DImageButton", self )		
+	end
+	
+	local StopMusic = vgui.Create( "DImageButton", self )		
 	StopMusic:SetPos( self:GetWide()/10 + self:GetTall()/2 + 10, 0 )
 	StopMusic:SetSize( self:GetTall()/2, self:GetTall()/2 )			
 	StopMusic:SetToolTip( Radio.GetLanguage("Stop") )
 	StopMusic:SetFont("Radio.Button")
-    StopMusic:SetImage( "numerix_radio/stop.png" )
-    StopMusic:CenterVertical(0.5)
+	StopMusic:SetImage( "numerix_radio/stop.png" )
+	StopMusic:CenterVertical(0.5)
 	StopMusic.Paint = function( self, w, h )            
 		if self:IsHovered() or self:IsDown() then
 			draw.RoundedBox( 5, 0, 0, w, h, Radio.Color["button_hover"] )
@@ -152,8 +152,8 @@ function PANEL:MakeContent(ent, type)
 	LoopMusic:SetSize( self:GetTall()/2, self:GetTall()/2 )			
 	LoopMusic:SetToolTip( Radio.GetLanguage("Loop") )
 	LoopMusic:SetFont("Radio.Button")
-    LoopMusic:SetImage( "numerix_radio/loop.png" )
-    LoopMusic:CenterVertical(0.5)
+	LoopMusic:SetImage( "numerix_radio/loop.png" )
+	LoopMusic:CenterVertical(0.5)
 	LoopMusic.Paint = function( self, w, h )            
 		if self:IsHovered() or self:IsDown() or radio:IsLooping() then
 			draw.RoundedBox( 5, 0, 0, w, h, Radio.Color["button_hover"] )
@@ -174,14 +174,14 @@ function PANEL:MakeContent(ent, type)
 			net.SendToServer()
 		end
 	end
-    
-    local TimeInfo = vgui.Create( "DLabel", self )
+	
+	local TimeInfo = vgui.Create( "DLabel", self )
 	TimeInfo:SetText( "" )
 	TimeInfo:SetTextColor(Radio.Color["text"])
 	TimeInfo:SetFont("Radio.Menu")
 	TimeInfo:SizeToContents()
-    TimeInfo:CenterVertical(0.5)
-    TimeInfo:CenterHorizontal(0.25)
+	TimeInfo:CenterVertical(0.5)
+	TimeInfo:CenterHorizontal(0.25)
 	TimeInfo.Think = function(self)
 		if radio:IsPlaying() then
 			if !radio:IsLive() then
@@ -199,7 +199,7 @@ function PANEL:MakeContent(ent, type)
 	end
 
 	local TimeSlider = vgui.Create( "DNumSlider", self )			
-    TimeSlider:SetSize( self:GetWide()/4, 40 )		
+	TimeSlider:SetSize( self:GetWide()/4, 40 )		
 	TimeSlider:SetText( "" )
 	TimeSlider.Label:Dock(0)
 	TimeSlider.Label:SetSize(0,0)	
@@ -210,11 +210,11 @@ function PANEL:MakeContent(ent, type)
 	TimeSlider.Slider:Dock(0)
 	TimeSlider.Slider:SetPos(0,0)
 	TimeSlider.Slider:SetSize(TimeSlider:GetWide(), 40)
-    TimeSlider:SetMin( 0 )				
-    TimeSlider:SetMax( isnumber(radio:GetMusicDuration()) and radio:GetMusicDuration() or 0 )				
-    TimeSlider:SetDecimals( 0 )	
-    TimeSlider:SetValue(radio:GetCurrentTime(false) or 0)
-    TimeSlider.TextArea:SetVisible(false)
+	TimeSlider:SetMin( 0 )				
+	TimeSlider:SetMax( isnumber(radio:GetMusicDuration()) and radio:GetMusicDuration() or 0 )				
+	TimeSlider:SetDecimals( 0 )	
+	TimeSlider:SetValue(radio:GetCurrentTime(false) or 0)
+	TimeSlider.TextArea:SetVisible(false)
 	TimeSlider.Think = function(s)
 		if radio:IsPlaying() and !radio:IsLive() then
 			if( !s:IsEditing() ) then
@@ -223,7 +223,7 @@ function PANEL:MakeContent(ent, type)
 
 			s:SetMax( radio:GetMusicDuration() or 0 )		
 			s:SetAlpha(255)
-            
+			
 		else
 			s:SetAlpha(0)
 		end
@@ -240,7 +240,7 @@ function PANEL:MakeContent(ent, type)
 			self:SetAlpha(0)
 		end
 	end
-    TimeSlider.Slider.Paint = function(self, w, h)
+	TimeSlider.Slider.Paint = function(self, w, h)
 		surface.SetDrawColor( Radio.Color["button_line"] )
 		surface.DrawRect( 0, h / 2 - 1, w-12, 5 )
 		
@@ -248,7 +248,7 @@ function PANEL:MakeContent(ent, type)
 		surface.SetDrawColor( Radio.Color["button_hover"] )
 		surface.DrawRect( 0, h / 2 - 1, x+(7.5/2), 5 )
 	end 
-    TimeSlider.Slider.Knob.Paint = function(self, w, h)
+	TimeSlider.Slider.Knob.Paint = function(self, w, h)
 		if TimeSlider:IsHovered() or self:IsHovered() then
 			surface.SetDrawColor( Radio.Color["button_hover"] )
 			draw.NoTexture()
@@ -282,9 +282,9 @@ function PANEL:MakeContent(ent, type)
 	VolumeInfo:SetText( Radio.GetLanguage("Volume") )
 	VolumeInfo:SetFont("Radio.Menu")
 	VolumeInfo:SetTextColor(Radio.Color["text"])
-    VolumeInfo:SizeToContents()
-    VolumeInfo:CenterVertical(0.5)
-    VolumeInfo:CenterHorizontal(0.8)
+	VolumeInfo:SizeToContents()
+	VolumeInfo:CenterVertical(0.5)
+	VolumeInfo:CenterHorizontal(0.8)
 	VolumeInfo.Think = function(self)
 		if radio:IsPlaying() then
 			self:SetAlpha(255)
@@ -293,11 +293,11 @@ function PANEL:MakeContent(ent, type)
 		end
 	end
 
-    local x, y = VolumeInfo:GetPos()
-    local VolumeSlider = vgui.Create( "DNumSlider", self )
-    VolumeSlider:SetPos( x + VolumeInfo:GetWide() + 10, 0 )	
-    VolumeSlider:SetSize( self:GetWide()/6, 40 )		
-    VolumeSlider:SetText( "" )
+	local x, y = VolumeInfo:GetPos()
+	local VolumeSlider = vgui.Create( "DNumSlider", self )
+	VolumeSlider:SetPos( x + VolumeInfo:GetWide() + 10, 0 )	
+	VolumeSlider:SetSize( self:GetWide()/6, 40 )		
+	VolumeSlider:SetText( "" )
 	VolumeSlider.Label:Dock(0)
 	VolumeSlider.Label:SetSize(0,0)	
 	VolumeSlider.Label:SetTextColor( Radio.Color["text"] )
@@ -307,12 +307,12 @@ function PANEL:MakeContent(ent, type)
 	VolumeSlider.Slider:Dock(0)
 	VolumeSlider.Slider:SetPos(0,0)
 	VolumeSlider.Slider:SetSize(VolumeSlider:GetWide(), 40)
-    VolumeSlider:SetMin( 0 )				
-    VolumeSlider:SetMax( 100 )				
-    VolumeSlider:SetDecimals( 0 )	
-    VolumeSlider:SetValue(radio:GetVolume())
+	VolumeSlider:SetMin( 0 )				
+	VolumeSlider:SetMax( 100 )				
+	VolumeSlider:SetDecimals( 0 )	
+	VolumeSlider:SetValue(radio:GetVolume())
 	VolumeSlider.TextArea:SetVisible(false)
-    VolumeSlider:CenterVertical(0.5)	
+	VolumeSlider:CenterVertical(0.5)	
 	VolumeSlider.Think = function(self)
 		if radio:IsPlaying() then
 			self:SetAlpha(255)
@@ -320,7 +320,7 @@ function PANEL:MakeContent(ent, type)
 			self:SetAlpha(0)
 		end
 	end		
-    VolumeSlider.Slider.Paint = function(self, w, h)
+	VolumeSlider.Slider.Paint = function(self, w, h)
 		surface.SetDrawColor( Radio.Color["button_line"] )
 		surface.DrawRect( 0, h / 2 - 1, w-12, 5 )
 
@@ -328,8 +328,8 @@ function PANEL:MakeContent(ent, type)
 		surface.SetDrawColor( Radio.Color["button_hover"] )
 		surface.DrawRect( 0, h / 2 - 1, x+(7.5)/2, 5 )
 	end
-	    
-    VolumeSlider.Slider.Knob.Paint = function(self, w, h)
+		
+	VolumeSlider.Slider.Knob.Paint = function(self, w, h)
 		if VolumeSlider:IsHovered() or self:IsHovered() then
 			surface.SetDrawColor( Radio.Color["button_hover"] )
 			draw.NoTexture()
@@ -343,19 +343,19 @@ function PANEL:MakeContent(ent, type)
 
 		if radio:GetVolume() == self:GetSlideX() * 100 then return end
 
-        net.Start("Radio:UpdateVolume")
-        net.WriteEntity(ent)
-        net.WriteUInt(self:GetSlideX() * 100, 7)
+		net.Start("Radio:UpdateVolume")
+		net.WriteEntity(ent)
+		net.WriteUInt(self:GetSlideX() * 100, 7)
 		net.SendToServer()
 		
 	end
 	function VolumeSlider.Slider.Knob:OnMouseReleased( mcode )
 		if radio:GetVolume() == self:GetParent():GetSlideX() * 100 then return end
 
-        net.Start("Radio:UpdateVolume")
-        net.WriteEntity(ent)
-        net.WriteUInt(self:GetParent():GetSlideX() * 100, 7)
-        net.SendToServer()
+		net.Start("Radio:UpdateVolume")
+		net.WriteEntity(ent)
+		net.WriteUInt(self:GetParent():GetSlideX() * 100, 7)
+		net.SendToServer()
 
 		return DLabel.OnMouseReleased( self, mcode )
 	end

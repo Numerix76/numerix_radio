@@ -19,7 +19,7 @@ hook.Add( "PlayerButtonDown", "Radio:KeyPressVehicle", function(ply, button)
 			if Radio.IsCarWithRadio(vehicle) then
 				Radio.OpenStreamMenu(vehicle)
 			else
-				ply:RadioChatInfo(Radio.GetLanguage("Please install a radio in the vehicle."), Radio.Chat.INFO)                  
+				ply:RadioChatInfo(Radio.GetLanguage("Please install a radio in the vehicle."), Radio.Chat.INFO)
 			end
 		end
 	end
@@ -32,14 +32,14 @@ hook.Add( "PlayerButtonDown", "Radio:KeyPressVehicle", function(ply, button)
 		end)
 
 		if IsValid( ply ) and !ply:InVehicle() then
-            local tr = util.TraceLine(util.GetPlayerTrace( ply ))
-            if IsValid(tr.Entity) and Radio.IsCar(tr.Entity) then 
+			local tr = util.TraceLine(util.GetPlayerTrace( ply ))
+			if IsValid(tr.Entity) and Radio.IsCar(tr.Entity) then 
 				net.Start("Radio:RetrieveFromVehicle")
 				net.WriteEntity(tr.Entity)
-                net.SendToServer()
-            end
-        end
-    end
+				net.SendToServer()
+			end
+		end
+	end
 end)
 
 local radio_open_menu = CreateClientConVar( "radio_open_menu", KEY_M )

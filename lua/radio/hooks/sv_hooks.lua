@@ -32,19 +32,19 @@ hook.Add( "PlayerCanHearPlayersVoice", "Radio:CanPlayerHearRadioVoice", function
 end)
 
 hook.Add( "playerGetSalary", "Radio:AnimSalary", function(ply, amount)
-    if Radio.Settings.MakeSalary then
-        if ply:Team() == Radio.Settings.TeamRadio then
-            local total = 0
-            for _, radio in ipairs(ents.FindByClass("numerix_radio_component")) do
+	if Radio.Settings.MakeSalary then
+		if ply:Team() == Radio.Settings.TeamRadio then
+			local total = 0
+			for _, radio in ipairs(ents.FindByClass("numerix_radio_component")) do
 				if !radio:IsServer() then continue end
-                if radio:GetParent():GetOwner() != ply then continue end
+				if radio:GetParent():GetOwner() != ply then continue end
 				
-                total = total + ent:GetListeners()*Radio.Settings.Salary
-            end
+				total = total + ent:GetListeners()*Radio.Settings.Salary
+			end
 
-            return false, DarkRP.getPhrase("payday_message", amount).." (+"..DarkRP.formatMoney(total)..")", total+amount
-        end
-    end
+			return false, DarkRP.getPhrase("payday_message", amount).." (+"..DarkRP.formatMoney(total)..")", total+amount
+		end
+	end
 end)
 
 

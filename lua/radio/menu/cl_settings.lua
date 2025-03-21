@@ -10,7 +10,7 @@ function PANEL:Init()
 end
 
 function PANEL:PerformLayout(width, height)
-    self:SetSize(width, height)
+	self:SetSize(width, height)
 end
 
 function PANEL:MakeContent(ent, type)
@@ -21,12 +21,12 @@ function PANEL:MakeContent(ent, type)
 	self.Paint = function(s, w, h) end
 
 	local Mixer = vgui.Create("DColorMixer", self)
-	Mixer:SetPos(5, 5)					
+	Mixer:SetPos(5, 5)
 	Mixer:SetSize(self:GetWide() - 10, self:GetTall()/1.4)
-	Mixer:SetPalette(true)  			
-	Mixer:SetAlphaBar(false) 			
-	Mixer:SetWangs(false) 				
-	Mixer:SetColor( radio:GetVisualColor() )	
+	Mixer:SetPalette(true)
+	Mixer:SetAlphaBar(false)
+	Mixer:SetWangs(false)
+	Mixer:SetColor( radio:GetVisualColor() )
 
 	local rainbow = vgui.Create( "DCheckBoxLabel", self )
 	rainbow:SetPos( 5, 5 + self:GetTall()/1.4 ) 
@@ -69,15 +69,15 @@ function PANEL:MakeContent(ent, type)
 	Visual:SetSize( self:GetWide()-10, 25 )
 	Visual.Paint = function( self, w, h )
 		draw.RoundedBox(5, 0, 0, w, h, Radio.Color["button_background"])
-            
+			
 		if self:IsHovered() or self:IsDown() then
 			draw.RoundedBox( 5, 0, 0, w, h, Radio.Color["button_hover"] )
 		end
 	end
-    Visual.DoClick = function()
+	Visual.DoClick = function()
 		local color = Mixer:GetColor()
 		
-        net.Start("Radio:UpdateSettings")
+		net.Start("Radio:UpdateSettings")
 		net.WriteEntity(ent)
 		net.WriteColor(Color(color.r, color.g, color.b))
 		net.WriteBool(rainbow:GetChecked() or false)

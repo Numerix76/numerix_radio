@@ -10,7 +10,7 @@ function PANEL:Init()
 end
 
 function PANEL:PerformLayout(width, height)
-    self:SetSize(width, height)
+	self:SetSize(width, height)
 end
 
 function PANEL:MakeContent(ent)
@@ -19,9 +19,9 @@ function PANEL:MakeContent(ent)
 	local radio = ent:GetRadioComponent()
 	if ( !radio ) then return end
 
-    RadioContent.Paint = function(self, w, h) end
+	RadioContent.Paint = function(self, w, h) end
 
-    local Playing = vgui.Create( "DLabel", RadioContent )
+	local Playing = vgui.Create( "DLabel", RadioContent )
 	Playing:SetPos( 10, 40 )
 	Playing:SetSize( RadioContent:GetWide()/2-25, 50 )
 	Playing:SetText( Radio.GetLanguage("Now Playing :") )
@@ -99,7 +99,7 @@ function PANEL:MakeContent(ent)
 			else
 				draw.RoundedBox(10, 0, 0, w, h, Radio.Color["textentry_background"])
 			end
-            derma.SkinHook( "Paint", "TextEntry", self, w, h )
+			derma.SkinHook( "Paint", "TextEntry", self, w, h )
 		end
 	end
 

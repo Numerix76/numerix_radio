@@ -8,22 +8,21 @@ Radio.Search = {
 	{}, -- SoundCloud
 }
 
-
 local PANEL = {}
 
-function PANEL:Init()   
+function PANEL:Init()
 end
 
 function PANEL:PerformLayout(width, height)
-    self:SetSize(width, height)
+	self:SetSize(width, height)
 end
 
 function PANEL:MakeContent(ent, type)
 	local RadioContent = self
 
-    self.Paint = function(self, w, h) end
+	self.Paint = function(self, w, h) end
 
-    local SetURL = vgui.Create( "DTextEntry", self )
+	local SetURL = vgui.Create( "DTextEntry", self )
 	SetURL:SetPos( self:GetWide()/4, 10 )
 	SetURL:SetSize( RadioContent:GetWide()/2, 30 )
 	SetURL:SetPlaceholderText(Radio.GetLanguage("Search"))
@@ -60,19 +59,19 @@ function Radio.ReloadMenu(menu, type, ent, error)
 	end
 
 	RadioScroll = vgui.Create( "DScrollPanel", menu )
-    RadioScroll:SetPos(5, 60)
+	RadioScroll:SetPos(5, 60)
 	RadioScroll:SetSize(menu:GetWide() - 10, menu:GetTall() - 60)
-    RadioScroll.VBar.Paint = function( s, w, h )
-        draw.RoundedBox( 0, 0, 0, w, h, Radio.Color["scroll_background"] )
-    end
-    RadioScroll.VBar.btnUp.Paint = function( s, w, h ) 
-        draw.RoundedBox( 0, 0, 0, w, h, Radio.Color["scroll_button"] )
-    end
-    RadioScroll.VBar.btnDown.Paint = function( s, w, h ) 
-        draw.RoundedBox( 0, 0, 0, w, h, Radio.Color["scroll_button"] )
-    end
-    RadioScroll.VBar.btnGrip.Paint = function( s, w, h )
-        draw.RoundedBox( 0, 0, 0, w, h, Radio.Color["scroll_bar"] )
+	RadioScroll.VBar.Paint = function( s, w, h )
+		draw.RoundedBox( 0, 0, 0, w, h, Radio.Color["scroll_background"] )
+	end
+	RadioScroll.VBar.btnUp.Paint = function( s, w, h ) 
+		draw.RoundedBox( 0, 0, 0, w, h, Radio.Color["scroll_button"] )
+	end
+	RadioScroll.VBar.btnDown.Paint = function( s, w, h ) 
+		draw.RoundedBox( 0, 0, 0, w, h, Radio.Color["scroll_button"] )
+	end
+	RadioScroll.VBar.btnGrip.Paint = function( s, w, h )
+		draw.RoundedBox( 0, 0, 0, w, h, Radio.Color["scroll_bar"] )
 	end
 	
 	menu.Paint = function(self, w, h)
@@ -84,11 +83,11 @@ function Radio.ReloadMenu(menu, type, ent, error)
 	end
 	
 	if error then return end
-    
-    local PresetList = vgui.Create( "DIconLayout", RadioScroll )
-    PresetList:Dock( FILL )
-    PresetList:SetSpaceY( 30 )
-    PresetList:SetSpaceX( 10 )
+	
+	local PresetList = vgui.Create( "DIconLayout", RadioScroll )
+	PresetList:Dock( FILL )
+	PresetList:SetSpaceY( 30 )
+	PresetList:SetSpaceX( 10 )
 	PresetList:SetSize(RadioScroll:GetWide(), menu:GetTall()/2 - 10)
 	
 	for k, v in ipairs(data) do
@@ -124,22 +123,22 @@ function Radio.ReloadMenu(menu, type, ent, error)
 		author:SetPos(base:GetWide()/5 + 10, 20)
 		author:SetSize(base:GetWide() - base:GetWide()/5 - 10, 20)
 
-        local ChangeMusic = vgui.Create("DButton", base )		
-        ChangeMusic:SetPos( base:GetWide()/5 + 10, 65 )
-        ChangeMusic:SetText( Radio.GetLanguage("Play") )
-        ChangeMusic:SetToolTip( Radio.GetLanguage("Play") )
-        ChangeMusic:SetFont("Radio.Button")
-        ChangeMusic:SetTextColor( Radio.Color["text"] )
+		local ChangeMusic = vgui.Create("DButton", base )		
+		ChangeMusic:SetPos( base:GetWide()/5 + 10, 65 )
+		ChangeMusic:SetText( Radio.GetLanguage("Play") )
+		ChangeMusic:SetToolTip( Radio.GetLanguage("Play") )
+		ChangeMusic:SetFont("Radio.Button")
+		ChangeMusic:SetTextColor( Radio.Color["text"] )
 		ChangeMusic:SetSize( base:GetWide()/4, 25 )
-        ChangeMusic.Paint = function( self, w, h )
-            draw.RoundedBox(5, 0, 0, w, h, Radio.Color["button_background"])
-            
-            if self:IsHovered() or self:IsDown() then
-                draw.RoundedBox( 5, 0, 0, w, h, Radio.Color["button_hover"] )
-            end
-        end
+		ChangeMusic.Paint = function( self, w, h )
+			draw.RoundedBox(5, 0, 0, w, h, Radio.Color["button_background"])
+			
+			if self:IsHovered() or self:IsDown() then
+				draw.RoundedBox( 5, 0, 0, w, h, Radio.Color["button_hover"] )
+			end
+		end
 		ChangeMusic.DoClick = function()
-    		Radio.Play(v.url, ent)
+			Radio.Play(v.url, ent)
 		end
 	end
 	
@@ -152,7 +151,7 @@ end
 function toURI(c)	
 	return string.format ("%%%02X", string.byte(c))
 end
- 
+
 function Radio.GetSearch(type, search, menu, ent)
 	search = string.Replace( string.gsub(search, "([^%w ])", toURI), " ", "%20")
 
@@ -184,6 +183,6 @@ function Radio.GetSearch(type, search, menu, ent)
 	end
 
 	menu.Paint = function(self, w, h)
-	    draw.SimpleText(Radio.GetLanguage("Searching..."), "Radio.Menu", w/2, h/2, Radio.Color["text"], TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+		draw.SimpleText(Radio.GetLanguage("Searching..."), "Radio.Menu", w/2, h/2, Radio.Color["text"], TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 	end
 end

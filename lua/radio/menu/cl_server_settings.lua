@@ -10,7 +10,7 @@ function PANEL:Init()
 end
 
 function PANEL:PerformLayout(width, height)
-    self:SetSize(width, height)
+	self:SetSize(width, height)
 end
 
 function PANEL:MakeContent(ent, type)
@@ -20,7 +20,7 @@ function PANEL:MakeContent(ent, type)
 
 	self.Paint = function(s, w, h) end
 
-    local StationName = vgui.Create( "DLabel", self )
+	local StationName = vgui.Create( "DLabel", self )
 	StationName:SetPos( 5, 5 )
 	StationName:SetText( Radio.GetLanguage("Station Name") )
 	StationName:SetTextColor( Radio.Color["text"] )
@@ -29,28 +29,28 @@ function PANEL:MakeContent(ent, type)
 
 	local NameEntry = vgui.Create( "DTextEntry", self )
 	NameEntry:SetPos( 10 + StationName:GetWide(), 0 )
-    NameEntry:SetSize( self:GetWide() - StationName:GetWide() - 20, 30 )
-    NameEntry:SetDrawLanguageID(false)
-    NameEntry:SetDrawBorder( false )
-    NameEntry:SetDrawBackground( false )
-    NameEntry:SetCursorColor( Radio.Color["text"] )
-    NameEntry:SetPlaceholderColor( Radio.Color["text_placeholder"] )
-    NameEntry:SetTextColor( Radio.Color["text"] )
+	NameEntry:SetSize( self:GetWide() - StationName:GetWide() - 20, 30 )
+	NameEntry:SetDrawLanguageID(false)
+	NameEntry:SetDrawBorder( false )
+	NameEntry:SetDrawBackground( false )
+	NameEntry:SetCursorColor( Radio.Color["text"] )
+	NameEntry:SetPlaceholderColor( Radio.Color["text_placeholder"] )
+	NameEntry:SetTextColor( Radio.Color["text"] )
 	NameEntry:SetText(radio:GetServerName())
 	function NameEntry:OnEnter()
 		net.Start("Radio:SetNameServer")
 		net.WriteEntity(ent)
-        net.WriteString(NameEntry:GetValue())
+		net.WriteString(NameEntry:GetValue())
 		net.SendToServer()
-    end
-    function NameEntry:Paint(w,h)
-        if self:IsEditing() then
-            draw.RoundedBox(10, 0, 0, w, h, Radio.Color["textentry_edit"])
-        else
-            draw.RoundedBox(10, 0, 0, w, h, Radio.Color["textentry_background"])
-        end
-        derma.SkinHook( "Paint", "TextEntry", self, w, h )
-    end
+	end
+	function NameEntry:Paint(w,h)
+		if self:IsEditing() then
+			draw.RoundedBox(10, 0, 0, w, h, Radio.Color["textentry_edit"])
+		else
+			draw.RoundedBox(10, 0, 0, w, h, Radio.Color["textentry_background"])
+		end
+		derma.SkinHook( "Paint", "TextEntry", self, w, h )
+	end
 
 	local Save = vgui.Create( "DButton", self )		
 	Save:SetPos( self:GetWide() - self:GetWide()/5-5, 40 )
@@ -61,7 +61,7 @@ function PANEL:MakeContent(ent, type)
 	Save:SetSize( self:GetWide()/5-5, 25 )
 	Save.Paint = function( self, w, h )
 		draw.RoundedBox(5, 0, 0, w, h, Radio.Color["button_background"])
-            
+			
 		if self:IsHovered() or self:IsDown() then
 			draw.RoundedBox( 5, 0, 0, w, h, Radio.Color["button_hover"] )
 		end
@@ -69,7 +69,7 @@ function PANEL:MakeContent(ent, type)
 	Save.DoClick = function()
 		net.Start("Radio:SetNameServer")
 		net.WriteEntity(ent)
-        net.WriteString(NameEntry:GetValue())
+		net.WriteString(NameEntry:GetValue())
 		net.SendToServer()
 	end
 

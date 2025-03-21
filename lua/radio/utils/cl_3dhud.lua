@@ -75,7 +75,6 @@ function Radio.Draw3DInfo(ent, InfoTable)
 	end
 
 	cam.Start3D2D( p, a, InfoTable.InfoOffsetText );
-
 		surface.SetFont( "Radio.Video.Info" )
 
 		if radio:GetInformation() != "" then
@@ -89,19 +88,13 @@ function Radio.Draw3DInfo(ent, InfoTable)
 			local Title = radio:GetMusicTitle()
 			local w, _ = surface.GetTextSize( Title );
 			if( w > InfoTable.InfoMaxWText ) then
-
 				for i = string.len( Title ), 1, -1 do
-
 					w, _ = surface.GetTextSize( string.sub( Title, 1, i ) );
 					if( w <= InfoTable.InfoMaxWText + 20 ) then
-
 						surface.DrawText( string.sub( Title, 1, i ) .. "..." );
 						break;
-
 					end
-
 				end
-
 			else
 				surface.DrawText( Title );
 			end
@@ -111,19 +104,13 @@ function Radio.Draw3DInfo(ent, InfoTable)
 			local Author = radio:GetMusicAuthor()
 			local w, _ = surface.GetTextSize( Author );
 			if( w > InfoTable.InfoMaxWText ) then
-
 				for i = string.len( Author ), 1, -1 do
-
 					local w, _ = surface.GetTextSize( string.sub( Author, 1, i ) );
 					if( w <= InfoTable.InfoMaxWText + 20 ) then
-
 						surface.DrawText( string.sub( Author, 1, i ) .. "..." );
 						break;
-
 					end
-
 				end
-
 			else
 				surface.DrawText( Author );
 			end

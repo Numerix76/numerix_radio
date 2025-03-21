@@ -8,44 +8,44 @@ if !Radio.Settings.EnableSWEP then return end
 
 AddCSLuaFile()
 
-SWEP.ViewModelFlip 			= false
-SWEP.Author					= "Numerix"
-SWEP.Instructions			= "Click Left : Open the radio menu\nClick Right : If look a vehicle then put the radio in it or put it at floor"
+SWEP.ViewModelFlip          = false
+SWEP.Author                 = "Numerix"
+SWEP.Instructions           = "Click Left : Open the radio menu\nClick Right : If look a vehicle then put the radio in it or put it at floor"
 
-SWEP.HoldType = "melee"
+SWEP.HoldType               = "melee"
 
-SWEP.ViewModelFOV = 70
-SWEP.ViewModelFlip = false
+SWEP.ViewModelFOV           = 70
+SWEP.ViewModelFlip          = false
 
-SWEP.ShowViewModel = false
-SWEP.ShowWorldModel = false
+SWEP.ShowViewModel          = false
+SWEP.ShowWorldModel         = false
 
-SWEP.ViewModel				= Model( "models/weapons/cstrike/c_knife_t.mdl" )
-SWEP.WorldModel 			= "models/sligwolf/grocel/radio/ghettoblaster.mdl"
+SWEP.ViewModel              = Model( "models/weapons/cstrike/c_knife_t.mdl" )
+SWEP.WorldModel             = "models/sligwolf/grocel/radio/ghettoblaster.mdl"
 
-SWEP.UseHands				= true
+SWEP.UseHands               = true
 
-SWEP.Spawnable				= true
-SWEP.AdminSpawnable			= false
+SWEP.Spawnable              = true
+SWEP.AdminSpawnable         = false
 
 SWEP.Primary.Damage         = 0
-SWEP.Primary.ClipSize		= -1
-SWEP.Primary.DefaultClip	= -1
-SWEP.Primary.Automatic		= false
-SWEP.Primary.Ammo			= "none"
-SWEP.Primary.Delay 			= 2
+SWEP.Primary.ClipSize       = -1
+SWEP.Primary.DefaultClip    = -1
+SWEP.Primary.Automatic      = false
+SWEP.Primary.Ammo           = "none"
+SWEP.Primary.Delay          = 2
 
-SWEP.Secondary.ClipSize		= -1
-SWEP.Secondary.DefaultClip	= -1
-SWEP.Secondary.Automatic	= false
-SWEP.Secondary.Ammo			= "none"
+SWEP.Secondary.ClipSize     = -1
+SWEP.Secondary.DefaultClip  = -1
+SWEP.Secondary.Automatic    = false
+SWEP.Secondary.Ammo         = "none"
 
-SWEP.Category 				= "Numerix Scripts"
-SWEP.PrintName				= "Radio"
-SWEP.Slot					= 2
-SWEP.SlotPos				= 1
-SWEP.DrawAmmo				= false
-SWEP.DrawCrosshair			= false
+SWEP.Category               = "Numerix Scripts"
+SWEP.PrintName              = "Radio"
+SWEP.Slot                   = 2
+SWEP.SlotPos                = 1
+SWEP.DrawAmmo               = false
+SWEP.DrawCrosshair          = false
 
 function SWEP:Initialize()
 	self:SetHoldType("melee")

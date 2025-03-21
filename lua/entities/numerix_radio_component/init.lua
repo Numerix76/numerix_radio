@@ -351,4 +351,3 @@ function ENT:CheckMusicFinished()
 		end
 	end
 end
-

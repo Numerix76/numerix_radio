@@ -13,7 +13,6 @@ function PANEL:PerformLayout(width, height)
 end
 
 function PANEL:MakeContent(ent, type)
-	   
 	self.Paint = function(s, w, h) end
 
 	local RadioScroll = vgui.Create( "DScrollPanel", self )

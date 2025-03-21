@@ -4,19 +4,15 @@ Radio made by Numerix (https://steamcommunity.com/id/numerix/)
 
 --------------------------------------------------------------------------------------------------]]
 
-ENT.Type 			= "anim"
-ENT.Base 			= "base_gmodentity"
-ENT.PrintName		= "Radio Base Core"
-ENT.Category		= "Numerix Scripts"
-ENT.Author			= "Numerix"
-ENT.Contact			= "https://steamcommunity.com/id/numerix/"
-ENT.Purpose			= ""
-ENT.Instructions	= ""					
-ENT.Spawnable 		= false
-
-function ENT:SetupDataTables()
-	
-end
+ENT.Type            = "anim"
+ENT.Base            = "base_gmodentity"
+ENT.PrintName       = "Radio Base Core"
+ENT.Category        = "Numerix Scripts"
+ENT.Author          = "Numerix"
+ENT.Contact         = "https://steamcommunity.com/id/numerix/"
+ENT.Purpose         = ""
+ENT.Instructions    = ""
+ENT.Spawnable       = false
 
 function ENT:IsConnectedToServer()
 	return self != self:GetController()
