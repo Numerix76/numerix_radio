@@ -47,7 +47,7 @@ hook.Add( "playerGetSalary", "Radio:AnimSalary", function(ply, amount)
     end
 end)
 
-
+/*
 hook.Add("PlayerLeaveVehicle", "Radio:LeaveCar", function(ply, veh)
 	if ( !ply:HasWeapon("numerix_radio_swep") ) then return end
 
@@ -67,3 +67,4 @@ hook.Add("PlayerLeaveVehicle", "Radio:LeaveCar", function(ply, veh)
 		end)
 	end
 end)
+*/
