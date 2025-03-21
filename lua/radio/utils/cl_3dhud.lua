@@ -135,7 +135,7 @@ function Radio.Draw3DInfo(ent, InfoTable)
 				else
 					surface.SetTextColor( Radio.Color["text"] )
 					surface.SetTextPos( InfoTable.InfoPosXText, InfoTable.InfoPosYTextError )
-					surface.DrawText( radio:GetCurrentTimeRadio(true) )	
+					surface.DrawText( Radio.SecondsToClock(radio:GetCurrentTime(false)) )	
 				end
 			end
 		end
