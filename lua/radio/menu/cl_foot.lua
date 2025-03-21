@@ -32,7 +32,9 @@ function PANEL:MakeContent(ent, type)
 	local radio = ent:GetRadioComponent()
 	if ( !radio ) then return end
 	
-	self.Paint = function(s, w, h) 
+	self.Paint = function(s, w, h)
+		if ( !IsValid(radio) ) then return end
+
 		if radio:GetInformation() != "" then
 			draw.DrawText(radio:GetInformation(), "Radio.Menu", w/2, h/2 - 10, Radio.Color["text"], TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 			return
@@ -57,6 +59,8 @@ function PANEL:MakeContent(ent, type)
 	end)
 
 	self.Think = function()
+		if ( !IsValid(radio) ) then return end
+
 		if radio:GetMusicThumbnail() != lastThumbnail then
 			Radio.GetImage( radio:GetMusicThumbnail(), "thumbnail.jpg", function(url, filename)
 				if !IsValid(icon) then return end
@@ -83,6 +87,8 @@ function PANEL:MakeContent(ent, type)
 	PlayPauseButton:SetTooltip(lastPauseState and Radio.GetLanguage("Pause") or Radio.GetLanguage("UnPause"))
 	PlayPauseButton:CenterVertical(0.5)
 	PlayPauseButton.Think = function( self )
+		if ( !IsValid(radio) ) then return end
+
 		if radio:IsConnectedToServer() or radio:GetURL() == "" then
 			self:SetAlpha(0)
 		else
@@ -112,6 +118,8 @@ function PANEL:MakeContent(ent, type)
 		end
 	end
 	PlayPauseButton.DoClick = function()
+		if ( !IsValid(radio) ) then return end
+
 		if !radio:IsConnectedToServer() and radio:GetURL() != "" then
 			net.Start("Radio:PauseMusic")
 			net.WriteEntity(ent)
@@ -133,6 +141,8 @@ function PANEL:MakeContent(ent, type)
 		end
 	end
 	StopMusic.Think = function(self)
+		if ( !IsValid(radio) ) then return end
+
 		if radio:IsConnectedToServer() or radio:GetURL() == "" then
 			self:SetAlpha(0)
 		else
@@ -140,6 +150,8 @@ function PANEL:MakeContent(ent, type)
 		end
 	end
 	StopMusic.DoClick = function()
+		if ( !IsValid(radio) ) then return end
+
 		if !radio:IsConnectedToServer() and radio:GetURL() != "" then
 			net.Start("Radio:StopMusic")
 			net.WriteEntity(ent)
@@ -160,6 +172,8 @@ function PANEL:MakeContent(ent, type)
 		end
 	end
 	LoopMusic.Think = function(self)
+		if ( !IsValid(radio) ) then return end
+
 		if radio:IsConnectedToServer() or radio:GetURL() == "" or radio:IsLive() then
 			self:SetAlpha(0)
 		else
@@ -167,6 +181,8 @@ function PANEL:MakeContent(ent, type)
 		end
 	end
 	LoopMusic.DoClick = function()
+		if ( !IsValid(radio) ) then return end
+
 		if !radio:IsConnectedToServer() and radio:GetURL() != "" and !radio:IsLive() then
 			net.Start("Radio:ChangeLoopState")
 			net.WriteEntity(ent)
@@ -183,6 +199,8 @@ function PANEL:MakeContent(ent, type)
 	TimeInfo:CenterVertical(0.5)
 	TimeInfo:CenterHorizontal(0.25)
 	TimeInfo.Think = function(self)
+		if ( !IsValid(radio) ) then return end
+
 		if radio:IsPlaying() then
 			if !radio:IsLive() then
 				self:SetText(Radio.SecondsToClock(radio:GetCurrentTime(false)).."/"..Radio.SecondsToClock(radio:GetMusicDuration()))	
@@ -216,6 +234,8 @@ function PANEL:MakeContent(ent, type)
 	TimeSlider:SetValue(radio:GetCurrentTime(false) or 0)
 	TimeSlider.TextArea:SetVisible(false)
 	TimeSlider.Think = function(s)
+		if ( !IsValid(radio) ) then return end
+
 		if radio:IsPlaying() and !radio:IsLive() then
 			if( !s:IsEditing() ) then
 				s:SetValue(radio:GetCurrentTime(false))
@@ -234,6 +254,8 @@ function PANEL:MakeContent(ent, type)
 		s:CenterVertical(0.5)
 	end
 	TimeSlider.Slider.Think = function(self)
+		if ( !IsValid(radio) ) then return end
+
 		if radio:IsPlaying() and !radio:IsLive() then
 			self:SetAlpha(255)
 		else
@@ -260,6 +282,8 @@ function PANEL:MakeContent(ent, type)
 		self:SetDragging( false );
 		self:MouseCapture( false );
 
+		if ( !IsValid(radio) ) then return end
+
 		if radio:IsPlaying() and !radio:IsLive() and Radio.Settings.Seek and !radio:IsConnectedToServer() then
 			net.Start("Radio:SeekMusic")
 			net.WriteEntity(ent)
@@ -268,6 +292,8 @@ function PANEL:MakeContent(ent, type)
 		end
 	end
 	function TimeSlider.Slider.Knob:OnMouseReleased( mcode )
+		if ( !IsValid(radio) ) then return end
+
 		if radio:IsPlaying() and !radio:IsLive() and Radio.Settings.Seek and !radio:IsConnectedToServer() then
 			net.Start("Radio:SeekMusic")
 			net.WriteEntity(ent)
@@ -286,6 +312,8 @@ function PANEL:MakeContent(ent, type)
 	VolumeInfo:CenterVertical(0.5)
 	VolumeInfo:CenterHorizontal(0.8)
 	VolumeInfo.Think = function(self)
+		if ( !IsValid(radio) ) then return end
+
 		if radio:IsPlaying() then
 			self:SetAlpha(255)
 		else
@@ -314,6 +342,8 @@ function PANEL:MakeContent(ent, type)
 	VolumeSlider.TextArea:SetVisible(false)
 	VolumeSlider:CenterVertical(0.5)	
 	VolumeSlider.Think = function(self)
+		if ( !IsValid(radio) ) then return end
+
 		if radio:IsPlaying() then
 			self:SetAlpha(255)
 		else
@@ -341,6 +371,7 @@ function PANEL:MakeContent(ent, type)
 		self:SetDragging( false );
 		self:MouseCapture( false );
 
+		if ( !IsValid(radio) ) then return end
 		if radio:GetVolume() == self:GetSlideX() * 100 then return end
 
 		net.Start("Radio:UpdateVolume")
@@ -350,6 +381,7 @@ function PANEL:MakeContent(ent, type)
 		
 	end
 	function VolumeSlider.Slider.Knob:OnMouseReleased( mcode )
+		if ( !IsValid(radio) ) then return end
 		if radio:GetVolume() == self:GetParent():GetSlideX() * 100 then return end
 
 		net.Start("Radio:UpdateVolume")

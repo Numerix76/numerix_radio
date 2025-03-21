@@ -28,6 +28,8 @@ function PANEL:MakeContent(ent)
 	Playing:SetTextColor(Radio.Color["text"])
 	Playing:SetFont("Radio.Menu")
 	Playing.Think = function(self)
+		if ( !IsValid(radio) ) then return end
+
 		if radio:IsPlaying() then
 			self:SetAlpha(255)
 		else
@@ -42,6 +44,8 @@ function PANEL:MakeContent(ent)
 	Title:SetTextColor(Radio.Color["text"])
 	Title:SetFont("Radio.Menu")
 	Title.Think = function(self)
+		if ( !IsValid(radio) ) then return end
+
 		if radio:IsPlaying() then
 			if radio:IsLive() then
 				self:SetText( Radio.GetLanguage("Radio Internet") )
@@ -62,6 +66,8 @@ function PANEL:MakeContent(ent)
 	Author:SetTextColor(Radio.Color["text"])
 	Author:SetFont("Radio.Menu")
 	Author.Think = function(self)
+		if ( !IsValid(radio) ) then return end
+		
 		if radio:IsPlaying() and !radio:IsLive() then
 			self:SetText( Radio.GetLanguage("Author : ")..radio:GetMusicAuthor() )
 
