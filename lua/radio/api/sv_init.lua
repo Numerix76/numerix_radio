@@ -3,8 +3,6 @@
 Radio made by Numerix (https://steamcommunity.com/id/numerix/)
 
 --------------------------------------------------------------------------------------------------]]
-local baseUri = "http://81.16.177.58:3000"
-local baseUriWS = "ws://81.16.177.58:3000"
 local ensFunctions, ensFunctionsDegrade
 
 local forceDegradeMode = false
@@ -113,7 +111,7 @@ local function connectWebsite(url, ply, successCallback, failedCallback, dataCal
 		progressCallback(Radio.GetLanguage("Conversion on the backend (this can take some time)"));
 	end
 	
-	http.Fetch(baseUri .. "/get/mp3/degrade", 
+	http.Fetch("http://" .. Radio.Settings.BackEnd .. "/get/mp3/degrade", 
 		function(body)
 			for _, data in pairs(util.JSONToTable(body)) do
 				if ensFunctionsDegrade[data.type] then
@@ -135,7 +133,7 @@ local function connectWebsocket(url, ply, successCallback, failedCallback, dataC
 		progressCallback(Radio.GetLanguage("Connection to the backend"));
 	end
 
-	local socket = GWSockets.createWebSocket( baseUriWS .."/get/mp3" )
+	local socket = GWSockets.createWebSocket( "ws://" .. Radio.Settings.BackEnd ..  .."/get/mp3" )
 
 	function socket:onMessage(txt)
 		local data = util.JSONToTable(txt)

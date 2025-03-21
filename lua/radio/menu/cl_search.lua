@@ -156,10 +156,10 @@ end
 function Radio.GetSearch(type, search, menu, ent)
 	search = string.Replace( string.gsub(search, "([^%w ])", toURI), " ", "%20")
 
-	http.Fetch("http://81.16.177.58:3000/search/".. (type == 1 and "youtube" or "soundcloud").. "/" ..search, 
+	http.Fetch("http://" .. Radio.Settings.BackEnd .. "/search/".. (type == 1 and "youtube" or "soundcloud").. "/" ..search, 
 		function( body, len, headers, code )
 			local data = util.JSONToTable(body)
-			
+
 			if istable(data) and !data.error then
 				Radio.Search[type] = data
 				Radio.ReloadMenu(menu, type, ent)
