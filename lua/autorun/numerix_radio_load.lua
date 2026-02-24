@@ -16,7 +16,7 @@ Radio.Settings.BackEnd = "81.16.177.58:3000"
 
 local FileSystem = "radio"
 local AddonName = "Radio"
-local Version = "3.0.0"
+local Version = "3.0.1"
 local FromWorkshop = false
 
 MsgC( Color( 225, 20, 30 ), "\n-------------------------------------------------------------------\n")
@@ -73,18 +73,6 @@ if SERVER then
 	end
 
 	hook.Add("PlayerConnect", "Radio:Connect", function()
-		if !game.SinglePlayer() then
-			http.Post("https://gmod-radio-numerix.mtxserv.com/api/connect.php", { script = FileSystem, ip = game.GetIPAddress() }, 
-			function(result)
-				if result then 
-					MsgC( Color( 225, 20, 30 ), "["..AddonName.."]", Color(255,255,255), " Connection established\n") 
-				end
-			end, 
-			function(failed)
-				MsgC( Color( 225, 20, 30 ), "["..AddonName.."]", Color(255,255,255), " Connection failed : "..failed.."\n")
-			end)
-		end
-
 		if !FromWorshop then
 			http.Fetch( "https://gmod-radio-numerix.mtxserv.com/api/version/"..FileSystem..".txt",
 				function( body, len, headers, code )
@@ -106,21 +94,6 @@ if SERVER then
 
 		hook.Remove("PlayerConnect", "Radio:Connect")
 	end)
-
-	hook.Add("ShutDown", "Radio:Disconnect", function()
-		if !game.SinglePlayer() then
-			http.Post("https://gmod-radio-numerix.mtxserv.com/api/disconnect.php", { script = FileSystem, ip = game.GetIPAddress() }, 
-			function(result)
-				if result then 
-					MsgC( Color( 225, 20, 30 ), "["..AddonName.."]", Color(255,255,255), " Disconnection\n") 
-				end
-			end, 
-			function(failed)
-				MsgC( Color( 225, 20, 30 ), "["..AddonName.."]", Color(255,255,255), " Disconnection failed : "..failed.."\n")
-			end)
-		end
-	end)
-
 end
 
 if CLIENT then
