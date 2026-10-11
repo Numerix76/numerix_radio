@@ -12,7 +12,7 @@ Radio.Language = Radio.Language or {}
 Radio.Color = Radio.Color or {}
 Radio.Chat = Radio.Chat or {}
 
-Radio.Settings.BackEnd = "81.16.177.58:3000"
+Radio.Settings.BackEnd = "185.206.151.138:3000"
 
 local FileSystem = "radio"
 local AddonName = "Radio"
